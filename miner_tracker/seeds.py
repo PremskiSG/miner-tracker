@@ -1,0 +1,47 @@
+"""Default NPV scenario seeds. The Sotkamo decks replicate the user's Excel
+(soto.xlsx cached values); other companies get a blank template."""
+from __future__ import annotations
+
+from miner_tracker import db
+from miner_tracker.npv import GlobalInputs, YearInputs, assumptions_from_inputs
+
+_SOSI_PRODUCTION = [1_200_000, 850_000, 1_000_000, 1_100_000, 1_150_000,
+                    1_200_000, 1_200_000, 1_200_000] + [1_100_000] * 9
+_SOSI_AISC = [35, 50, 47.7, 47.7, 46.64, 46.64, 46.64, 46.64] + [49.82] * 9
+_SOSI_INTEREST = [3_780_000, 3_500_000, 2_000_000] + [0] * 14
+_SOSI_TAX = [0.2, 0.2, 0.0] + [0.2] * 14
+_SOSI_DEP = 7_461_449.18
+
+
+def _sotkamo_scenario(price: float, payability: float,
+                      track_filing_price: bool = False) -> dict:
+    g = GlobalInputs(payability=payability, mining_tax=0.025, discount_rate=0.10,
+                     market_cap=154_200_000.0, net_debt=16_684_629.41,
+                     shares_outstanding=350.0)
+    years = [YearInputs(year=2024 + i, production_oz=_SOSI_PRODUCTION[i],
+                        aisc=_SOSI_AISC[i], price=price, depreciation=_SOSI_DEP,
+                        interest=_SOSI_INTEREST[i], tax_rate=_SOSI_TAX[i])
+             for i in range(17)]
+    out = assumptions_from_inputs(g, years)
+    out["ui"] = {"track_filing_price": track_filing_price}
+    return out
+
+
+def blank_scenario(start_year: int = 2026, n_years: int = 15) -> dict:
+    g = GlobalInputs(payability=1.0, mining_tax=0.0, discount_rate=0.10)
+    years = [YearInputs(year=start_year + i) for i in range(n_years)]
+    return assumptions_from_inputs(g, years)
+
+
+def seed_company_scenarios(conn, company_id: int, ticker: str) -> None:
+    """Create default scenarios if the company has none."""
+    if db.load_scenarios(conn, company_id):
+        return
+    if ticker == "SOSI1":
+        db.save_scenario(conn, company_id, "spot",
+                         _sotkamo_scenario(60.79, 1.18, track_filing_price=True))
+        db.save_scenario(conn, company_id, "bear", _sotkamo_scenario(20.0, 0.85))
+        db.save_scenario(conn, company_id, "bull", _sotkamo_scenario(500.0, 0.85))
+    else:
+        db.save_scenario(conn, company_id, "base", blank_scenario())
+    conn.commit()

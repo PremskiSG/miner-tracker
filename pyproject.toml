@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "miner-tracker"
+version = "0.1.0"
+description = "Small-cap gold/silver producer tracker: quarterly metrics from report PDFs + NPV models"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit>=1.38",
+    "plotly>=5.20",
+    "pandas>=2.2",
+    "anthropic>=0.40",
+    "PyYAML>=6.0",
+    "yfinance>=0.2.40",
+    "pdfplumber>=0.11",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "openpyxl"]
+
+[tool.setuptools.packages.find]
+include = ["miner_tracker*"]

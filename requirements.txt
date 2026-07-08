@@ -1,0 +1,7 @@
+# Streamlit Community Cloud runtime deps (read-only website).
+# The extraction pipeline (anthropic/pdfplumber/yfinance) runs locally via
+# `pip install -e .` — see pyproject.toml.
+streamlit>=1.38
+plotly>=5.20
+pandas>=2.2
+PyYAML>=6.0

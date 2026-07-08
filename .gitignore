@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.egg-info/
+secrets.yaml
+.DS_Store
+# the sqlite db IS committed — it's the website's data layer on Streamlit Cloud

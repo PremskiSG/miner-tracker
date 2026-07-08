@@ -1,0 +1,20 @@
+# Where portfolio_alerts drops the filing PDFs (read in place, never copied).
+filings_dir: /Users/premski/code/Claude_Code/portfolio_alerts/data/filings
+
+extraction:
+  provider: deepseek       # deepseek (Anthropic-compatible endpoint, PDF->text) | anthropic (native PDF)
+  model: deepseek-v4-pro
+  fallback_model:          # anthropic-only: escalate to e.g. claude-sonnet-5
+  max_pages_primary: 100   # anthropic-only: docs longer than this go to the fallback model
+  max_tokens: 8192
+  # To switch to the Claude API later:
+  #   provider: anthropic
+  #   model: claude-haiku-4-5
+  #   fallback_model: claude-sonnet-5
+
+companies:
+  - market: NORDIC
+    ticker: SOSI1
+    name: Sotkamo Silver
+    reporting_currency: SEK
+    fx_pair: SEKUSD
