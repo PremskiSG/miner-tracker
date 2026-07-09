@@ -12,6 +12,10 @@ _SOSI_INTEREST = [3_780_000, 3_500_000, 2_000_000] + [0] * 14
 _SOSI_TAX = [0.2, 0.2, 0.0] + [0.2] * 14
 _SOSI_DEP = 7_461_449.18
 
+# User's scenario price decks (USD/oz). Gold constants are for phase-2 companies.
+SILVER_BEAR, SILVER_BULL = 35.0, 80.0
+GOLD_BEAR, GOLD_BULL = 3_000.0, 6_000.0
+
 
 def _sotkamo_scenario(price: float, payability: float,
                       track_filing_price: bool = False) -> dict:
@@ -40,8 +44,8 @@ def seed_company_scenarios(conn, company_id: int, ticker: str) -> None:
     if ticker == "SOSI1":
         db.save_scenario(conn, company_id, "spot",
                          _sotkamo_scenario(60.79, 1.18, track_filing_price=True))
-        db.save_scenario(conn, company_id, "bear", _sotkamo_scenario(20.0, 0.85))
-        db.save_scenario(conn, company_id, "bull", _sotkamo_scenario(500.0, 0.85))
+        db.save_scenario(conn, company_id, "bear", _sotkamo_scenario(SILVER_BEAR, 0.85))
+        db.save_scenario(conn, company_id, "bull", _sotkamo_scenario(SILVER_BULL, 0.85))
     else:
         db.save_scenario(conn, company_id, "base", blank_scenario())
     conn.commit()
