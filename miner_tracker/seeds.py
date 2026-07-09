@@ -42,10 +42,11 @@ def seed_company_scenarios(conn, company_id: int, ticker: str) -> None:
     if db.load_scenarios(conn, company_id):
         return
     if ticker == "SOSI1":
-        db.save_scenario(conn, company_id, "spot",
-                         _sotkamo_scenario(60.79, 1.18, track_filing_price=True))
-        db.save_scenario(conn, company_id, "bear", _sotkamo_scenario(SILVER_BEAR, 0.85))
-        db.save_scenario(conn, company_id, "bull", _sotkamo_scenario(SILVER_BULL, 0.85))
+        # payabilities per user: spot = filings average, bear = bottom of the
+        # filings range, bull = top (refine via the page's filings caption)
+        db.save_scenario(conn, company_id, "spot", _sotkamo_scenario(58.0, 1.20))
+        db.save_scenario(conn, company_id, "bear", _sotkamo_scenario(SILVER_BEAR, 1.05))
+        db.save_scenario(conn, company_id, "bull", _sotkamo_scenario(SILVER_BULL, 1.38))
     else:
         db.save_scenario(conn, company_id, "base", blank_scenario())
     conn.commit()

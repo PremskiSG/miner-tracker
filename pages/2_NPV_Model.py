@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from miner_tracker import db, ui
+from miner_tracker import db, queries, ui
 from miner_tracker.npv import GlobalInputs, YearInputs, assumptions_from_inputs, compute
 from miner_tracker.seeds import blank_scenario, seed_company_scenarios
 
@@ -60,11 +60,16 @@ while years_list[-1]["year"] < last_year:          # extend by copying last year
     years_list.append(nxt)
 years_list = [y for y in years_list if y["year"] <= last_year]
 
+stats = queries.filings_stats(conn, company["id"])
+
 st.subheader("Global inputs")
 saved_price = float(years_list[0].get("price") or 0.0)
 c = st.columns(7)
 g_dict["payability"] = c[0].number_input(
     "Payability", value=float(g_dict.get("payability", 1.0)), step=0.01, format="%.2f")
+if stats and stats["pay_avg"]:
+    c[0].caption(f"Filings: min {stats['pay_min']:.2f} · avg {stats['pay_avg']:.2f} "
+                 f"· max {stats['pay_max']:.2f}")
 
 track = c[1].checkbox("Track latest filing", value=bool(ui_prefs.get(
     "track_filing_price", False)) and filing_price is not None,
@@ -96,6 +101,32 @@ g_dict["net_debt"] = net_debt_m * 1e6
 g_dict["shares_outstanding"] = shares or None
 
 st.subheader("Per-year assumptions")
+
+
+def _apply_to_all_years(field: str, value: float) -> None:
+    """Persist a filings-derived value into every model year of this scenario."""
+    s = scenarios[name]
+    for y in s.get("years", []):
+        y[field] = round(value, 2)
+    db.save_scenario(conn, company["id"], name, s)
+    conn.commit()
+    st.rerun()
+
+
+if stats and (stats["aisc_usd"] or stats["interest_usd"]):
+    fc = st.columns([3, 1.2, 1.4])
+    parts = []
+    if stats["aisc_usd"]:
+        parts.append(f"AISC ${stats['aisc_usd']:.2f}/oz (= (opex + capex) / oz, "
+                     "the Excel back-calc)")
+    if stats["interest_usd"]:
+        parts.append(f"interest ${stats['interest_usd']/1e6:.2f}M/yr")
+    fc[0].caption("From filings, trailing 4 quarters: " + " · ".join(parts))
+    if stats["aisc_usd"] and fc[1].button("Apply AISC to all years"):
+        _apply_to_all_years("aisc", stats["aisc_usd"])
+    if stats["interest_usd"] and fc[2].button("Apply interest to all years"):
+        _apply_to_all_years("interest", stats["interest_usd"])
+
 ROW_FIELDS = ["production_oz", "aisc", "fx", "capex", "depreciation",
               "interest", "tax_rate"]
 grid = (pd.DataFrame(years_list)

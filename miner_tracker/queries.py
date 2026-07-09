@@ -60,6 +60,48 @@ def review_rows(conn, company_id: int) -> pd.DataFrame:
         conn, params=(company_id,))
 
 
+def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
+    """Forecast anchors computed from extracted filings:
+    payability range (reported revenue vs production x realized price, USD),
+    trailing production-weighted AISC (USD/oz), trailing annual interest (USD)."""
+    rows = conn.execute(
+        """SELECT m.period,
+             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
+                AND period=m.period AND metric='reported_cost')          AS cost,
+             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
+                AND period=m.period AND metric='capex')                  AS capex,
+             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
+                AND period=m.period AND metric='silver_production_oz')   AS oz,
+             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
+                AND period=m.period AND metric='silver_price_realized')  AS price,
+             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
+                AND period=m.period AND metric='interest_expense')       AS interest,
+             m.value AS revenue, f.rate AS fx
+           FROM quarterly_metrics m
+           JOIN companies c ON c.id = m.company_id
+           LEFT JOIN fx_rates f ON f.pair = c.fx_pair AND f.period = m.period
+           WHERE m.company_id = ? AND m.metric = 'revenue' AND m.period LIKE '%-Q%'
+           ORDER BY m.period""", (company_id,)).fetchall()
+    rows = [r for r in rows if r["fx"]]
+    if not rows:
+        return None
+    pays = [(r["revenue"] * r["fx"]) / (r["oz"] * r["price"])
+            for r in rows if r["oz"] and r["price"]]
+    aisc_rows = [r for r in rows if r["cost"] and r["oz"]][-trailing:]
+    aisc = (sum((r["cost"] + (r["capex"] or 0)) * r["fx"] for r in aisc_rows)
+            / sum(r["oz"] for r in aisc_rows)) if aisc_rows else None
+    int_rows = [r for r in rows if r["interest"] is not None][-trailing:]
+    interest = sum(r["interest"] * r["fx"] for r in int_rows) if int_rows else None
+    return {
+        "pay_min": min(pays) if pays else None,
+        "pay_avg": sum(pays) / len(pays) if pays else None,
+        "pay_max": max(pays) if pays else None,
+        "aisc_usd": aisc,
+        "interest_usd": interest,
+        "n_quarters": len(rows),
+    }
+
+
 def extraction_runs_frame(conn) -> pd.DataFrame:
     return pd.read_sql_query(
         """SELECT r.id, d.path, r.model, r.status, r.error, r.input_tokens,
