@@ -1,0 +1,190 @@
+{
+ "revenue": {
+  "value": 29450000,
+  "currency": "AUD",
+  "unit": "AUD",
+  "page": 4,
+  "confidence": "high"
+ },
+ "ebitda": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "ebit": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "net_income": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "equity": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "equity_ratio_pct": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "personnel": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "reported_cost": {
+  "value": 18700000,
+  "currency": "AUD",
+  "unit": "AUD; Mining 10.3M + Processing 9.1M + Site Services 1.0M + Royalties 1.0M + Inventory Movement -2.7M",
+  "page": 4,
+  "confidence": "high"
+ },
+ "capex": {
+  "value": 3649000,
+  "currency": "AUD",
+  "unit": "AUD",
+  "page": 5,
+  "confidence": "high"
+ },
+ "depreciation": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "interest_expense": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "cash": {
+  "value": 20700000,
+  "currency": "AUD",
+  "unit": "AUD",
+  "page": 11,
+  "confidence": "high"
+ },
+ "debt": {
+  "value": 8600000,
+  "currency": "AUD",
+  "unit": "AUD; drawn portion of 12.45M finance facility",
+  "page": 11,
+  "confidence": "high"
+ },
+ "silver_price_realized": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "gold_price_realized": {
+  "value": 4520,
+  "currency": "AUD",
+  "unit": "AUD/oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "silver_production_oz": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "gold_production_oz": {
+  "value": 6183,
+  "currency": null,
+  "unit": "oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "gold_sold_oz": {
+  "value": 6515,
+  "currency": null,
+  "unit": "oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "zinc_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "lead_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "high"
+ },
+ "head_grade_gpt": {
+  "value": 1.05,
+  "currency": null,
+  "unit": "g/t",
+  "page": 4,
+  "confidence": "high"
+ },
+ "ore_mined_t": {
+  "value": 83107000,
+  "currency": null,
+  "unit": "t; 83,107 BCM converted to tonnes",
+  "page": 4,
+  "confidence": "medium"
+ },
+ "ore_milled_t": {
+  "value": 206660,
+  "currency": null,
+  "unit": "t",
+  "page": 1,
+  "confidence": "high"
+ },
+ "recovery_pct": {
+  "value": 88,
+  "currency": null,
+  "unit": "%",
+  "page": 4,
+  "confidence": "high"
+ },
+ "aisc_reported": {
+  "value": 3413,
+  "currency": "AUD",
+  "unit": "AUD/oz",
+  "page": 4,
+  "confidence": "high"
+ },
+ "cash_cost_per_oz": {
+  "value": 2565,
+  "currency": "AUD",
+  "unit": "AUD/oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "period": {
+  "year": 2025,
+  "quarter": 1
+ },
+ "reporting_currency": "AUD",
+ "notes": "Report covers March 2025 quarter (Q1 2025). Gold production of 6,183 oz with mill throughput of 206,660 dry tonnes at 1.05 g/t head grade and 88% recovery. Gold sales of 6,515 oz at average price of A$4,520/oz generated revenue of A$29.45M. Cash costs of A$2,565/oz excluding royalties and stock adjustments. AISC of A$3,413/oz. Capital expenditure of A$3.084M including exploration A$1.323M. Cash on hand A$20.70M as at 31 March 2025."
+}

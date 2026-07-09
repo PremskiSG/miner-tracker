@@ -112,7 +112,15 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.executescript(DDL)
+    _migrate(conn)
     return conn
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(companies)")}
+    if "metal" not in cols:
+        conn.execute("ALTER TABLE companies ADD COLUMN metal TEXT NOT NULL DEFAULT 'silver'")
+        conn.commit()
 
 
 def _now() -> str:
@@ -120,14 +128,15 @@ def _now() -> str:
 
 
 def upsert_company(conn, market: str, ticker: str, name: str,
-                   reporting_currency: str, fx_pair: str | None) -> int:
+                   reporting_currency: str, fx_pair: str | None,
+                   metal: str = "silver") -> int:
     conn.execute(
-        """INSERT INTO companies(market, ticker, name, reporting_currency, fx_pair)
-           VALUES(?,?,?,?,?)
+        """INSERT INTO companies(market, ticker, name, reporting_currency, fx_pair, metal)
+           VALUES(?,?,?,?,?,?)
            ON CONFLICT(market, ticker) DO UPDATE SET
              name=excluded.name, reporting_currency=excluded.reporting_currency,
-             fx_pair=excluded.fx_pair""",
-        (market, ticker, name, reporting_currency, fx_pair))
+             fx_pair=excluded.fx_pair, metal=excluded.metal""",
+        (market, ticker, name, reporting_currency, fx_pair, metal))
     row = conn.execute("SELECT id FROM companies WHERE market=? AND ticker=?",
                        (market, ticker)).fetchone()
     return row["id"]

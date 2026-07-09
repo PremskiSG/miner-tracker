@@ -19,8 +19,9 @@ company = ui.select_company()
 if company is None:
     st.stop()
 
+metal = (company.get("metal") or "silver").lower()
 conn = db.connect()
-seed_company_scenarios(conn, company["id"], company["ticker"])
+seed_company_scenarios(conn, company["id"], company["ticker"], metal=metal)
 scenarios = db.load_scenarios(conn, company["id"])
 
 names = list(scenarios)
@@ -39,16 +40,22 @@ g_dict = dict(assumptions.get("globals", {}))
 years_list = assumptions.get("years", []) or blank_scenario()["years"]
 ui_prefs = dict(assumptions.get("ui", {}))
 
-# ── latest realized silver price from the filings ─────────────────────────────
+# ── latest realized metal price from the filings (converted to USD) ───────────
 row = conn.execute(
-    """SELECT period, value FROM quarterly_metrics
-       WHERE company_id=? AND metric='silver_price_realized'
-         AND value IS NOT NULL AND period LIKE '%-Q%'""",
+    f"""SELECT m.period, m.value, m.currency, f.rate
+       FROM quarterly_metrics m
+       LEFT JOIN fx_rates f ON f.pair = m.currency || 'USD' AND f.period = m.period
+       WHERE m.company_id=? AND m.metric='{metal}_price_realized'
+         AND m.value IS NOT NULL AND m.period LIKE '%-Q%'""",
     (company["id"],)).fetchall()
 filing_price = filing_period = None
 if row:
     latest = max(row, key=lambda r: float(r["period"].replace("-Q", ".")))
-    filing_price, filing_period = round(latest["value"], 2), latest["period"]
+    value = latest["value"]
+    if (latest["currency"] or "USD") != "USD":
+        value = value * latest["rate"] if latest["rate"] else None
+    if value is not None:
+        filing_price, filing_period = round(value, 2), latest["period"]
 
 # ── extend / truncate the model horizon ────────────────────────────────────────
 last_year = st.sidebar.number_input("Last model year",
@@ -76,7 +83,7 @@ track = c[1].checkbox("Track latest filing", value=bool(ui_prefs.get(
     disabled=filing_price is None,
     help="Apply the last realized silver price extracted from the filings "
          "to every model year")
-price = c[1].number_input("Silver price (USD/oz)",
+price = c[1].number_input(f"{metal.capitalize()} price (USD/oz)",
                           value=float(filing_price if track and filing_price
                                       else saved_price),
                           step=0.5, format="%.2f", disabled=track)
@@ -117,8 +124,9 @@ if stats and (stats["aisc_usd"] or stats["interest_usd"]):
     fc = st.columns([3, 1.2, 1.4])
     parts = []
     if stats["aisc_usd"]:
-        parts.append(f"AISC ${stats['aisc_usd']:.2f}/oz (= (opex + capex) / oz, "
-                     "the Excel back-calc)")
+        how = ("as reported by the company" if stats.get("aisc_source") == "reported"
+               else "= (opex + capex) / oz, the Excel back-calc")
+        parts.append(f"AISC ${stats['aisc_usd']:,.2f}/oz ({how})")
     if stats["interest_usd"]:
         parts.append(f"interest ${stats['interest_usd']/1e6:.2f}M/yr")
     fc[0].caption("From filings, trailing 4 quarters: " + " · ".join(parts))
@@ -162,7 +170,7 @@ fig.add_scatter(x=[y.year for y in result.years],
                 name="Enterprise value", mode="lines",
                 line=dict(color="#1F4E79", width=3))
 fig.update_layout(title=f"{company['name']} NPV10 Cashflow (USD) — {name} "
-                        f"@ ${price:.2f}/oz",
+                        f"@ ${price:,.2f}/oz {metal}",
                   height=450, yaxis_tickformat="$,.0f")
 st.plotly_chart(fig, use_container_width=True)
 

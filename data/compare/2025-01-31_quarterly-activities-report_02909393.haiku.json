@@ -1,0 +1,190 @@
+{
+ "revenue": {
+  "value": 26600000,
+  "currency": "A$",
+  "unit": "A$",
+  "page": 1,
+  "confidence": "high"
+ },
+ "ebitda": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "ebit": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "net_income": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "equity": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "equity_ratio_pct": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "personnel": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "reported_cost": {
+  "value": 19900000,
+  "currency": "A$",
+  "unit": "A$ (mining 9.3M + processing 7.9M + site services 1.6M + royalties 0.9M + inventory movement 0.2M)",
+  "page": 4,
+  "confidence": "high"
+ },
+ "capex": {
+  "value": 3297000,
+  "currency": "A$",
+  "unit": "A$",
+  "page": 4,
+  "confidence": "high"
+ },
+ "depreciation": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "interest_expense": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "cash": {
+  "value": 16710000,
+  "currency": "A$",
+  "unit": "A$",
+  "page": 1,
+  "confidence": "high"
+ },
+ "debt": {
+  "value": 9200000,
+  "currency": "A$",
+  "unit": "A$ (drawn down portion of 12.45M facility)",
+  "page": 14,
+  "confidence": "high"
+ },
+ "silver_price_realized": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "gold_price_realized": {
+  "value": 4060,
+  "currency": "A$",
+  "unit": "A$/oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "silver_production_oz": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "gold_production_oz": {
+  "value": 6861,
+  "currency": null,
+  "unit": "oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "gold_sold_oz": {
+  "value": 6551,
+  "currency": null,
+  "unit": "oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "zinc_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "lead_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "head_grade_gpt": {
+  "value": 1.17,
+  "currency": null,
+  "unit": "g/t",
+  "page": 3,
+  "confidence": "high"
+ },
+ "ore_mined_t": {
+  "value": 80990,
+  "currency": null,
+  "unit": "t",
+  "page": 3,
+  "confidence": "high"
+ },
+ "ore_milled_t": {
+  "value": 208673,
+  "currency": null,
+  "unit": "t",
+  "page": 1,
+  "confidence": "high"
+ },
+ "recovery_pct": {
+  "value": 87.4,
+  "currency": null,
+  "unit": "%",
+  "page": 1,
+  "confidence": "high"
+ },
+ "aisc_reported": {
+  "value": 3314,
+  "currency": "A$",
+  "unit": "A$/oz",
+  "page": 4,
+  "confidence": "high"
+ },
+ "cash_cost_per_oz": {
+  "value": 2891,
+  "currency": "A$",
+  "unit": "A$/oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "period": {
+  "year": 2024,
+  "quarter": 4
+ },
+ "reporting_currency": "A$",
+ "notes": "Quarterly activities report for December 2024 quarter. Gold sales of 6,551 oz at average price A$4,060/oz generated A$26.6M revenue. Mill throughput was 208,673 dry tonnes at 1.17 g/t head grade with 87.4% recovery, producing 6,861 oz of gold. Cash costs (excluding royalties and stock adjustments) were A$2,891/oz. AISC per ounce was A$3,314/oz. Capital expenditure of A$3.297M included exploration, capital works, and plant/equipment. Closing cash position was A$16.71M as at 31 December 2024 with A$9.2M of the A$12.45M finance facility drawn down."
+}

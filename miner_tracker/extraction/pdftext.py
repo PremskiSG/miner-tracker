@@ -29,6 +29,10 @@ def pdf_to_text(pdf_path: Path, doc_type: str) -> str:
                 text = page.extract_text(layout=True) or ""
             except Exception:
                 text = page.extract_text() or ""
+            # layout mode pads lines with trailing spaces and emits swathes of
+            # blank lines — strip them (no information loss, big char savings)
+            lines = [ln.rstrip() for ln in text.splitlines()]
+            text = re.sub(r"\n{3,}", "\n\n", "\n".join(lines))
             pages.append((i, text))
 
     if doc_type == "annual_report":

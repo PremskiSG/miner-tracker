@@ -20,10 +20,27 @@ _KIND_MAP = {
     "interim-report": "interim_report",
     "half-year-report": "interim_report",
     "financial-statement-release": "fs_release",
-    "annual-report": "annual_report",
+    "quarterly-activities-report": "quarterly_activities",
 }
 
-_FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_([a-z\-]+)_[0-9a-f]+\.pdf$")
+# (prefix, doc_type) rules for kinds that embed years/suffixes, e.g.
+# "appendix-4d-and-2025-half-year-financial-report"
+_KIND_PREFIXES = [
+    ("appendix-4d", "half_year_report"),
+    ("appendix-4e", "fy_report"),
+    ("annual-report", "annual_report"),
+]
+
+_FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_([a-z0-9\-]+)_[0-9a-f]+\.pdf$")
+
+
+def doc_type_for_kind(kind: str) -> str | None:
+    if kind in _KIND_MAP:
+        return _KIND_MAP[kind]
+    for prefix, doc_type in _KIND_PREFIXES:
+        if kind.startswith(prefix):
+            return doc_type
+    return None
 
 _CATEGORY_MAP = {
     "measured": "measured",
@@ -41,7 +58,8 @@ def sync(conn) -> int:
     new = 0
     for c in companies():
         cid = db.upsert_company(conn, c["market"], c["ticker"], c["name"],
-                                c["reporting_currency"], c.get("fx_pair"))
+                                c["reporting_currency"], c.get("fx_pair"),
+                                metal=c.get("metal", "silver"))
         folder = filings_dir() / f"{c['market']}_{c['ticker']}"
         if not folder.is_dir():
             logger.warning("no filings folder: %s", folder)
@@ -52,7 +70,7 @@ def sync(conn) -> int:
                 logger.warning("unrecognized filename, skipping: %s", pdf.name)
                 continue
             date, kind = m.group(1), m.group(2)
-            doc_type = _KIND_MAP.get(kind)
+            doc_type = doc_type_for_kind(kind)
             existing = conn.execute("SELECT 1 FROM documents WHERE path=?",
                                     (str(pdf),)).fetchone()
             if existing:
@@ -85,6 +103,21 @@ def expected_period(published_date: str, doc_type: str) -> str:
         return f"{d.year - 1}-Q4"
     quarter = {3: 1, 4: 1, 5: 1, 6: 2, 7: 2, 8: 2, 9: 3, 10: 3, 11: 3, 12: 4}[d.month]
     return f"{d.year}-Q{quarter}"
+
+
+def fin_period_label(doc_type: str, period_end_date: str) -> str | None:
+    """Non-quarter period label for half-year / full-year financial reports:
+    half ended Dec-2025 -> '2025-H2'; year ended Jun-2025 -> 'FY2025-06'."""
+    try:
+        d = datetime.strptime(period_end_date[:10], "%Y-%m-%d")
+    except ValueError:
+        try:
+            d = datetime.strptime(period_end_date[:7], "%Y-%m")
+        except ValueError:
+            return None
+    if doc_type == "half_year_report":
+        return f"{d.year}-H{1 if d.month <= 6 else 2}"
+    return f"FY{d.year}-{d.month:02d}"
 
 
 def _days_in_quarter(period: str) -> int:
@@ -128,8 +161,8 @@ def _write_metrics(conn, company_id: int, period: str, metrics: dict,
         db.upsert_metric(conn, company_id, period, "aisc_derived",
                          (cost + capex) / oz, cost_ccy, "/oz", doc_id, None, conf,
                          is_derived=1, needs_review=1 if doc_review else 0)
-    # Derived: tonnes/quarter -> tonnes/day
-    if values.get("ore_milled_t", (0,))[0] and not period.endswith("FY"):
+    # Derived: tonnes/quarter -> tonnes/day (quarterly periods only)
+    if values.get("ore_milled_t", (0,))[0] and "-Q" in period:
         t = values["ore_milled_t"][0]
         db.upsert_metric(conn, company_id, period, "tpd_derived",
                          t / _days_in_quarter(period), None, "t/d", doc_id, None,
@@ -145,10 +178,14 @@ def _extract_fn(provider: str):
 
 
 def process_doc(conn, doc, company_cfg: dict, model_override: str | None = None,
-                dry_run: bool = False) -> bool:
+                dry_run: bool = False, provider_override: str | None = None) -> bool:
     """Extract one document. Returns True on success."""
     settings = extraction_settings()
-    provider = settings.get("provider", "anthropic")
+    provider = provider_override or settings.get("provider", "anthropic")
+    if provider_override and not model_override:
+        # sensible per-provider default when only --provider is given
+        model_override = {"anthropic": "claude-haiku-4-5",
+                          "deepseek": "deepseek-v4-pro"}[provider_override]
     primary = model_override or settings.get("model", "claude-haiku-4-5")
     fallback = settings.get("fallback_model", "claude-sonnet-5")
     max_tokens = int(settings.get("max_tokens", 8192))
@@ -181,7 +218,8 @@ def process_doc(conn, doc, company_cfg: dict, model_override: str | None = None,
         started = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
             result = extract_fn(path, doc["doc_type"], company_cfg["name"],
-                                doc["published_date"], attempt_model, max_tokens)
+                                doc["published_date"], attempt_model, max_tokens,
+                                metal=company_cfg.get("metal", "silver"))
         except Exception as e:  # API error or bad JSON -> try fallback once
             finished = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             db.log_run(conn, doc["id"], attempt_model, started, finished, None, None,
@@ -216,7 +254,7 @@ def _store(conn, doc, company_cfg: dict, data: dict) -> None:
                        Path(doc["path"]).name, currency,
                        company_cfg["reporting_currency"])
 
-    if doc["doc_type"] == "interim_report":
+    if doc["doc_type"] in ("interim_report", "quarterly_activities"):
         p = data["period"]
         period = f"{p['year']}-Q{p['quarter']}"
         exp = expected_period(doc["published_date"], doc["doc_type"])
@@ -225,6 +263,19 @@ def _store(conn, doc, company_cfg: dict, data: dict) -> None:
                            Path(doc["path"]).name, period, exp)
             doc_review = True
         _write_metrics(conn, cid, period, data, currency, doc["id"], doc_review)
+        conn.execute("UPDATE documents SET period=? WHERE id=?", (period, doc["id"]))
+
+    elif doc["doc_type"] in ("half_year_report", "fy_report"):
+        period = fin_period_label(doc["doc_type"], data.get("period_end_date", ""))
+        if period is None:
+            logger.warning("%s: bad period_end_date %r -> needs_review, using doc date",
+                           Path(doc["path"]).name, data.get("period_end_date"))
+            doc_review = True
+            d = datetime.strptime(doc["published_date"], "%Y-%m-%d")
+            period = (f"{d.year}-H?" if doc["doc_type"] == "half_year_report"
+                      else f"FY{d.year}-??")
+        _write_metrics(conn, cid, period, data["metrics"], currency, doc["id"],
+                       doc_review)
         conn.execute("UPDATE documents SET period=? WHERE id=?", (period, doc["id"]))
 
     elif doc["doc_type"] == "fs_release":
@@ -258,7 +309,8 @@ def _store(conn, doc, company_cfg: dict, data: dict) -> None:
 def extract_pending(conn, company: str | None = None, doc_path: str | None = None,
                     model: str | None = None, force: bool = False,
                     dry_run: bool = False, limit: int | None = None,
-                    doc_type: str | None = None) -> tuple[int, int]:
+                    doc_type: str | None = None,
+                    provider: str | None = None) -> tuple[int, int]:
     """Run extraction over pending (or --force all) documents. Returns (ok, failed)."""
     cfg_by_key = {f"{c['market']}_{c['ticker']}": c for c in companies()}
     q = """SELECT d.*, c.market || '_' || c.ticker AS key FROM documents d
@@ -287,7 +339,8 @@ def extract_pending(conn, company: str | None = None, doc_path: str | None = Non
         if cfg is None:
             logger.warning("no config for %s, skipping", doc["key"])
             continue
-        if process_doc(conn, doc, cfg, model_override=model, dry_run=dry_run):
+        if process_doc(conn, doc, cfg, model_override=model, dry_run=dry_run,
+                       provider_override=provider):
             ok += 1
         else:
             failed += 1

@@ -23,8 +23,11 @@ def main(argv: list[str] | None = None) -> int:
     ex.add_argument("--dry-run", action="store_true")
     ex.add_argument("--limit", type=int, help="max documents this run")
     ex.add_argument("--type", dest="doc_type",
-                    choices=["interim_report", "fs_release", "annual_report"],
+                    choices=["interim_report", "quarterly_activities", "fs_release",
+                             "half_year_report", "fy_report", "annual_report"],
                     help="only documents of this type")
+    ex.add_argument("--provider", choices=["anthropic", "deepseek"],
+                    help="override config provider (with its default model)")
 
     fx = sub.add_parser("fx", help="refresh quarterly FX rates from yfinance")
     fx.add_argument("--start-year", type=int, default=2021)
@@ -41,7 +44,7 @@ def main(argv: list[str] | None = None) -> int:
         ok, failed = extract_pending(conn, company=args.company, doc_path=args.doc,
                                      model=args.model, force=args.force,
                                      dry_run=args.dry_run, limit=args.limit,
-                                     doc_type=args.doc_type)
+                                     doc_type=args.doc_type, provider=args.provider)
         total = conn.execute(
             "SELECT COALESCE(SUM(cost_usd),0) c FROM extraction_runs").fetchone()["c"]
         print(f"extract: {ok} ok, {failed} failed. Cumulative API cost: ${total:.2f}")

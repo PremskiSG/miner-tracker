@@ -18,3 +18,10 @@ companies:
     name: Sotkamo Silver
     reporting_currency: SEK
     fx_pair: SEKUSD
+    metal: silver
+  - market: AU
+    ticker: BCN
+    name: Beacon Minerals
+    reporting_currency: AUD
+    fx_pair: AUDUSD
+    metal: gold

@@ -1,0 +1,69 @@
+{
+ "fiscal_year": 2025,
+ "reserves": [
+  {
+   "statement_date": "2025-06-30",
+   "category": "proven_probable",
+   "metal": "Gold",
+   "tonnage_t": 3700000.0,
+   "grade_gpt": 1.2,
+   "page": 3,
+   "confidence": "high"
+  },
+  {
+   "statement_date": "2025-06-30",
+   "category": "proven_probable",
+   "metal": "Gold",
+   "tonnage_t": 147000.0,
+   "grade_gpt": 4.48,
+   "page": 3,
+   "confidence": "high"
+  },
+  {
+   "statement_date": "2025-06-30",
+   "category": "measured",
+   "metal": "Gold",
+   "tonnage_t": 2326000.0,
+   "grade_gpt": 1.29,
+   "page": 67,
+   "confidence": "high"
+  },
+  {
+   "statement_date": "2025-06-30",
+   "category": "indicated",
+   "metal": "Gold",
+   "tonnage_t": 5109000.0,
+   "grade_gpt": 1.34,
+   "page": 67,
+   "confidence": "high"
+  },
+  {
+   "statement_date": "2025-06-30",
+   "category": "inferred",
+   "metal": "Gold",
+   "tonnage_t": 13471000.0,
+   "grade_gpt": 1.12,
+   "page": 67,
+   "confidence": "high"
+  },
+  {
+   "statement_date": "2025-06-30",
+   "category": "proven_probable",
+   "metal": "Gold",
+   "tonnage_t": 1930000.0,
+   "grade_gpt": 1.1,
+   "page": 66,
+   "confidence": "high"
+  },
+  {
+   "statement_date": "2025-06-30",
+   "category": "proven_probable",
+   "metal": "Gold",
+   "tonnage_t": 4399000.0,
+   "grade_gpt": 1.3,
+   "page": 66,
+   "confidence": "high"
+  }
+ ],
+ "notes": "Reserve and resource estimates are as of 30 June 2025. Iguana Ore Reserve of 3.4 million tonnes at 1.20 g/t Au for 132,200 ounces reported on page 3. Mt Dimer Ore Reserve of 147k tonnes at 4.48 g/t Au for 21,000 ounces reported on page 3. Iguana Mineral Resource Estimate of 17 million tonnes at 1.11 g/t Au for 609,000 ounces reported on pages 3 and 67. Total measured, indicated, and inferred resources from page 67 Table 2: Measured 2,326kt at 1.29 g/t Au, Indicated 5,109kt at 1.34 g/t Au, Inferred 13,471kt at 1.12 g/t Au. Total Proven reserves 1,930kt at 1.1 g/t Au and Probable reserves 4,399kt at 1.3 g/t Au from page 66 Table 1. Tonnages converted from thousands to absolute units."
+}

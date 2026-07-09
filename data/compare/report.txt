@@ -1,0 +1,98 @@
+
+=== 2024-08-01_quarterly-activities-report_02835157.pdf (quarterly_activities)
+  haiku     ok    13.6s  $0.1079  (99862+1599 tok)
+  deepseek  ok    18.6s  $0.0012  (128+1330 tok)
+    ~ aisc_reported: haiku=None  deepseek=4593.0   <-- ONLY ONE
+    ! capex: haiku=8885000  deepseek=11336000.0   <-- DISAGREE
+    ! ore_milled_t: haiku=160848000  deepseek=160848.0   <-- DISAGREE
+    ~ ore_mined_t: haiku=18134000  deepseek=None   <-- ONLY ONE
+
+=== 2024-08-30_appendix-4e-preliminary-final-report_02847994.pdf (fy_report)
+  haiku     ok     6.5s  $0.0311  (23113+1606 tok)
+  deepseek  ok    16.8s  $0.0051  (9032+1355 tok)
+    ~ depreciation: haiku=None  deepseek=13080000   <-- ONLY ONE
+    ~ equity_ratio_pct: haiku=59.95  deepseek=None   <-- ONLY ONE
+    ! ore_milled_t: haiku=759214000  deepseek=759214   <-- DISAGREE
+    ~ ore_mined_t: haiku=2295000000  deepseek=None   <-- ONLY ONE
+    ~ personnel: haiku=None  deepseek=13370000   <-- ONLY ONE
+    ~ reported_cost: haiku=63397567  deepseek=None   <-- ONLY ONE
+
+=== 2024-09-24_annual-report-to-shareholders_02857608.pdf (annual_report)
+  haiku     FAIL   5.1s  BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'prompt is too long: 203058 tokens > 200000 maximum'}, 'request_id': 'req_011Ccr2bugWJSXjTsPRVSgu9'}
+  deepseek  ok    32.2s  $0.0224  (49331+1117 tok)
+
+=== 2024-10-30_quarterly-activities-report_02875053.pdf (quarterly_activities)
+  haiku     ok    16.1s  $0.1215  (113582+1578 tok)
+  deepseek  ok    22.9s  $0.0162  (34534+1351 tok)
+    ~ ore_mined_t: haiku=54230  deepseek=None   <-- ONLY ONE
+    ! reported_cost: haiku=18400000  deepseek=17200000.0   <-- DISAGREE
+
+=== 2025-01-31_quarterly-activities-report_02909393.pdf (quarterly_activities)
+  haiku     ok    18.6s  $0.1280  (119894+1612 tok)
+  deepseek  ok    23.6s  $0.0163  (34676+1344 tok)
+    ~ ore_mined_t: haiku=80990  deepseek=None   <-- ONLY ONE
+
+=== 2025-02-27_appendix-4d-and-2024-half-year-financial-report_02920313.pdf (half_year_report)
+  haiku     ok    16.9s  $0.0852  (77655+1516 tok)
+  deepseek  ok    19.3s  $0.0107  (21824+1389 tok)
+    ~ ebit: haiku=-2360000  deepseek=None   <-- ONLY ONE
+    ~ ebitda: haiku=11670000  deepseek=None   <-- ONLY ONE
+    ~ equity_ratio_pct: haiku=59.6  deepseek=None   <-- ONLY ONE
+    ~ personnel: haiku=None  deepseek=414188   <-- ONLY ONE
+    ! recovery_pct: haiku=1.02  deepseek=87.93   <-- DISAGREE
+
+=== 2025-04-28_quarterly-activities-report_02941361.pdf (quarterly_activities)
+  haiku     ok    12.2s  $0.0461  (38142+1600 tok)
+  deepseek  ok    16.8s  $0.0065  (12493+1270 tok)
+    ! capex: haiku=3649000  deepseek=3084000   <-- DISAGREE
+    ~ ore_mined_t: haiku=83107000  deepseek=None   <-- ONLY ONE
+
+=== 2025-07-31_quarterly-activities-report_02975072.pdf (quarterly_activities)
+  haiku     ok    11.6s  $0.0430  (35278+1548 tok)
+  deepseek  ok    20.3s  $0.0068  (12781+1381 tok)
+    ! aisc_reported: haiku=3344  deepseek=3719   <-- DISAGREE
+    ~ ore_mined_t: haiku=117884000  deepseek=None   <-- ONLY ONE
+
+=== 2025-08-29_appendix-4e-preliminary-final-report_02988645.pdf (fy_report)
+  haiku     ok    10.5s  $0.0315  (23690+1566 tok)
+  deepseek  ok    19.8s  $0.0054  (9470+1436 tok)
+    ~ equity_ratio_pct: haiku=59.2  deepseek=None   <-- ONLY ONE
+    ! interest_expense: haiku=1679099  deepseek=550595   <-- DISAGREE
+    ~ ore_mined_t: haiku=1682000  deepseek=None   <-- ONLY ONE
+    ~ personnel: haiku=None  deepseek=14940000   <-- ONLY ONE
+
+=== 2025-09-05_annual-report-to-shareholders_02991898.pdf (annual_report)
+  haiku     FAIL   1.9s  BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'messages.0.content.0.pdf.source.base64.data: A maximum of 100 PDF pages may be provided.'}, 'request_id': 'req_011Ccr2w9NJexwTivHhDpFGU'}
+  deepseek  ok    27.3s  $0.0230  (51345+747 tok)
+
+=== 2025-10-31_quarterly-activities-report_03019246.pdf (quarterly_activities)
+  haiku     ok    14.8s  $0.0738  (65823+1597 tok)
+  deepseek  ok    21.0s  $0.0102  (20644+1393 tok)
+    ! debt: haiku=9720000  deepseek=14730000   <-- DISAGREE
+    ~ ore_mined_t: haiku=79941  deepseek=None   <-- ONLY ONE
+    ! reported_cost: haiku=23300000  deepseek=28300000   <-- DISAGREE
+
+=== 2026-01-30_quarterly-activities-report_03055270.pdf (quarterly_activities)
+  haiku     ok    12.2s  $0.0347  (26713+1591 tok)
+  deepseek  ok    15.2s  $0.0051  (9173+1268 tok)
+    ~ ore_mined_t: haiku=69438  deepseek=None   <-- ONLY ONE
+
+=== 2026-02-27_appendix-4d-and-2025-half-year-financial-report_03066761.pdf (half_year_report)
+  haiku     ok    15.7s  $0.1010  (92891+1624 tok)
+  deepseek  ok    45.0s  $0.0130  (24866+2539 tok)
+    ! cash: haiku=36140226  deepseek=18036902   <-- DISAGREE
+    ~ equity_ratio_pct: haiku=60.04  deepseek=None   <-- ONLY ONE
+    ~ ore_mined_t: haiku=149379000  deepseek=None   <-- ONLY ONE
+
+=== 2026-04-30_quarterly-activities-report_03088979.pdf (quarterly_activities)
+  haiku     ok    12.7s  $0.0364  (28800+1525 tok)
+  deepseek  ok    15.1s  $0.0053  (9698+1240 tok)
+    ! capex: haiku=13400000  deepseek=6421000   <-- DISAGREE
+    ~ depreciation: haiku=2422000  deepseek=None   <-- ONLY ONE
+    ~ ore_mined_t: haiku=101420  deepseek=None   <-- ONLY ONE
+    ! reported_cost: haiku=24300000  deepseek=18500000   <-- DISAGREE
+
+=== TOTALS
+  haiku     cost $0.840  time 168s  failures 2
+  deepseek  cost $0.147  time 314s  failures 0
+  fields: 161 agree, 13 disagree, 24 only-one-found

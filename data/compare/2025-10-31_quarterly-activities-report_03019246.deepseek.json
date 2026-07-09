@@ -1,0 +1,190 @@
+{
+ "revenue": {
+  "value": 28900000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 7,
+  "confidence": "high"
+ },
+ "ebitda": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "ebit": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "net_income": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "equity": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "equity_ratio_pct": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "personnel": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "reported_cost": {
+  "value": 28300000,
+  "currency": "AUD",
+  "unit": "Sum of A$18.2m cash operating costs + A$0.9m royalties + A$2.9m sustaining capital + A$1.4m corporate cost + A$0.8m exploration + A$0m exploration Lady Ida - A$0.2m inventory adjustments + A$0.6m rehabilitation (Page 7). Excludes depreciation, financial items, taxes, and non-sustaining/inventory items.",
+  "page": 7,
+  "confidence": "medium"
+ },
+ "capex": {
+  "value": 3234000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 8,
+  "confidence": "high"
+ },
+ "depreciation": {
+  "value": 7000000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 7,
+  "confidence": "high"
+ },
+ "interest_expense": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "cash": {
+  "value": 18110000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 1,
+  "confidence": "high"
+ },
+ "debt": {
+  "value": 14730000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 22,
+  "confidence": "high"
+ },
+ "silver_price_realized": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "gold_price_realized": {
+  "value": 5210,
+  "currency": "AUD",
+  "unit": "A$/oz",
+  "page": 7,
+  "confidence": "high"
+ },
+ "silver_production_oz": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "gold_production_oz": {
+  "value": 6884,
+  "currency": null,
+  "unit": "oz",
+  "page": 7,
+  "confidence": "high"
+ },
+ "gold_sold_oz": {
+  "value": 5550,
+  "currency": null,
+  "unit": "oz",
+  "page": 7,
+  "confidence": "high"
+ },
+ "zinc_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "lead_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "head_grade_gpt": {
+  "value": 1.01,
+  "currency": null,
+  "unit": "g/t",
+  "page": 7,
+  "confidence": "high"
+ },
+ "ore_mined_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "ore_milled_t": {
+  "value": 248827,
+  "currency": null,
+  "unit": "t",
+  "page": 7,
+  "confidence": "high"
+ },
+ "recovery_pct": {
+  "value": 85,
+  "currency": null,
+  "unit": "%",
+  "page": 7,
+  "confidence": "high"
+ },
+ "aisc_reported": {
+  "value": 4092,
+  "currency": "AUD",
+  "unit": "A$/oz",
+  "page": 8,
+  "confidence": "high"
+ },
+ "cash_cost_per_oz": {
+  "value": 3386,
+  "currency": "AUD",
+  "unit": "A$/oz",
+  "page": 7,
+  "confidence": "high"
+ },
+ "period": {
+  "year": 2025,
+  "quarter": 3
+ },
+ "reporting_currency": "AUD",
+ "notes": "Ore mined reported only in BCM (79,941 BCM) \u2013 tonnage not provided, so set to null. Revenue is 'Gold revenue3' A$28.9M for the quarter. Reported_cost sums mining, processing, site services, royalties, sustaining capital, exploration, corporate cost, inventory adjustments, and rehabilitation from the Cost Summary table (page 7), resulting in $28.3M, which reflects total operating costs excluding depreciation. AISC of A$4,092/oz referenced on page 8 and page 1. Finance Facility of $14.73M used for debt."
+}

@@ -31,13 +31,18 @@ def _sotkamo_scenario(price: float, payability: float,
     return out
 
 
-def blank_scenario(start_year: int = 2026, n_years: int = 15) -> dict:
-    g = GlobalInputs(payability=1.0, mining_tax=0.0, discount_rate=0.10)
-    years = [YearInputs(year=start_year + i) for i in range(n_years)]
-    return assumptions_from_inputs(g, years)
+def blank_scenario(start_year: int = 2026, n_years: int = 15,
+                   price: float = 0.0, payability: float = 1.0,
+                   track_filing_price: bool = False) -> dict:
+    g = GlobalInputs(payability=payability, mining_tax=0.0, discount_rate=0.10)
+    years = [YearInputs(year=start_year + i, price=price) for i in range(n_years)]
+    out = assumptions_from_inputs(g, years)
+    out["ui"] = {"track_filing_price": track_filing_price}
+    return out
 
 
-def seed_company_scenarios(conn, company_id: int, ticker: str) -> None:
+def seed_company_scenarios(conn, company_id: int, ticker: str,
+                           metal: str = "silver") -> None:
     """Create default scenarios if the company has none."""
     if db.load_scenarios(conn, company_id):
         return
@@ -47,6 +52,12 @@ def seed_company_scenarios(conn, company_id: int, ticker: str) -> None:
         db.save_scenario(conn, company_id, "spot", _sotkamo_scenario(58.0, 1.20))
         db.save_scenario(conn, company_id, "bear", _sotkamo_scenario(SILVER_BEAR, 1.05))
         db.save_scenario(conn, company_id, "bull", _sotkamo_scenario(SILVER_BULL, 1.38))
+    elif metal == "gold":
+        # user's gold decks: bear $3,000 / bull $6,000; spot tracks the filings
+        db.save_scenario(conn, company_id, "spot",
+                         blank_scenario(track_filing_price=True))
+        db.save_scenario(conn, company_id, "bear", blank_scenario(price=GOLD_BEAR))
+        db.save_scenario(conn, company_id, "bull", blank_scenario(price=GOLD_BULL))
     else:
         db.save_scenario(conn, company_id, "base", blank_scenario())
     conn.commit()

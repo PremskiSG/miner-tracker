@@ -1,0 +1,188 @@
+{
+ "period_end_date": "2024-06-30",
+ "metrics": {
+  "revenue": {
+   "value": 83379068,
+   "currency": "AUD",
+   "unit": "82.9m; 83,379,068",
+   "page": 5,
+   "confidence": "high"
+  },
+  "ebitda": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "ebit": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "net_income": {
+   "value": 8735033,
+   "currency": "AUD",
+   "unit": "8,735,033",
+   "page": 5,
+   "confidence": "high"
+  },
+  "equity": {
+   "value": 67672150,
+   "currency": "AUD",
+   "unit": "67,672,150",
+   "page": 6,
+   "confidence": "high"
+  },
+  "equity_ratio_pct": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "personnel": {
+   "value": 13370000,
+   "currency": "AUD",
+   "unit": "13.37m; 13,370,000",
+   "page": 3,
+   "confidence": "medium"
+  },
+  "reported_cost": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "capex": {
+   "value": 3111746,
+   "currency": "AUD",
+   "unit": "3,111,746",
+   "page": 8,
+   "confidence": "high"
+  },
+  "depreciation": {
+   "value": 13080000,
+   "currency": "AUD",
+   "unit": "13.08m; 13,080,000",
+   "page": 3,
+   "confidence": "medium"
+  },
+  "interest_expense": {
+   "value": 263289,
+   "currency": "AUD",
+   "unit": "263,289",
+   "page": 5,
+   "confidence": "high"
+  },
+  "cash": {
+   "value": 5796691,
+   "currency": "AUD",
+   "unit": "5,796,691",
+   "page": 6,
+   "confidence": "high"
+  },
+  "debt": {
+   "value": 9363846,
+   "currency": "AUD",
+   "unit": "9,363,846 (2,652,203 + 6,711,643)",
+   "page": 6,
+   "confidence": "high"
+  },
+  "silver_price_realized": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "gold_price_realized": {
+   "value": 3159,
+   "currency": "AUD",
+   "unit": "AUD/oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "silver_production_oz": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "gold_production_oz": {
+   "value": 23068,
+   "currency": null,
+   "unit": "oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "gold_sold_oz": {
+   "value": 26769,
+   "currency": null,
+   "unit": "oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "zinc_production_t": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "lead_production_t": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "head_grade_gpt": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "ore_mined_t": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "ore_milled_t": {
+   "value": 759214,
+   "currency": null,
+   "unit": "DMT",
+   "page": 1,
+   "confidence": "high"
+  },
+  "recovery_pct": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "aisc_reported": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "cash_cost_per_oz": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  }
+ },
+ "notes": "Revenue includes gold sales (82,895,898) and interest revenue (483,170). Debt is total plant and equipment loan (current 2,652,203 + non-current 6,711,643). Personnel cost taken from prose on page 3 stating total wages paid 13.37m. Depreciation extracted from prose on page 3 (13.08m). Reported costs cannot be reliably summed from available income statement line items as cost of goods sold includes depreciation and other components not detailed. EBITDA and EBIT cannot be calculated precisely without depreciation and amortization breakdown within cost of goods sold."
+}

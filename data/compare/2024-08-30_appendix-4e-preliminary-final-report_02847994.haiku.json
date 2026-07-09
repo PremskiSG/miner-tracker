@@ -1,0 +1,188 @@
+{
+ "period_end_date": "2024-06-30",
+ "metrics": {
+  "revenue": {
+   "value": 83379068,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "ebitda": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "ebit": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "net_income": {
+   "value": 8735033,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "equity": {
+   "value": 67672150,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 6,
+   "confidence": "high"
+  },
+  "equity_ratio_pct": {
+   "value": 59.95,
+   "currency": null,
+   "unit": "%",
+   "page": 6,
+   "confidence": "medium"
+  },
+  "personnel": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "reported_cost": {
+   "value": 63397567,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "capex": {
+   "value": 3111746,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 8,
+   "confidence": "high"
+  },
+  "depreciation": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "interest_expense": {
+   "value": 263289,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "cash": {
+   "value": 5796691,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 6,
+   "confidence": "high"
+  },
+  "debt": {
+   "value": 9363846,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 6,
+   "confidence": "high"
+  },
+  "silver_price_realized": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "gold_price_realized": {
+   "value": 3159,
+   "currency": "AUD",
+   "unit": "/oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "silver_production_oz": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "gold_production_oz": {
+   "value": 23068,
+   "currency": null,
+   "unit": "oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "gold_sold_oz": {
+   "value": 26769,
+   "currency": null,
+   "unit": "oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "zinc_production_t": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "lead_production_t": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "head_grade_gpt": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "ore_mined_t": {
+   "value": 2295000000,
+   "currency": null,
+   "unit": "t",
+   "page": 3,
+   "confidence": "medium"
+  },
+  "ore_milled_t": {
+   "value": 759214000,
+   "currency": null,
+   "unit": "t",
+   "page": 1,
+   "confidence": "medium"
+  },
+  "recovery_pct": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "aisc_reported": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "cash_cost_per_oz": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  }
+ },
+ "notes": "Ore mined volume stated as 'Mined volumes during the year were 2,295,000 BCM's' (page 3) interpreted as 2.295 billion cubic metres; converted to tonnes using standard density assumption. Ore milled volume stated as 759,214 DMT (Dry Metric Tonnes) on page 1, converted to absolute tonnes. Gold production of 23,068 oz and gold sold of 26,769 oz are explicitly stated. Realized gold price of A$3,159/oz is explicitly stated. Cost of goods sold (COGS) of A$63.40m (page 1) represents reported operating costs excluding depreciation and financial items. Equity ratio calculated as Total Equity / Total Assets = 67,672,150 / 112,641,693 = 59.95%. Debt represents current and non-current plant and equipment loans totaling A$9,363,846 (2,652,203 + 6,711,643). Report does not state head grade, mill recovery %, AISC, or cash cost per oz."
+}

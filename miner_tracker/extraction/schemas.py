@@ -43,13 +43,18 @@ METRIC_DEFS: dict[str, bool] = {
     "cash": True,
     "debt": True,
     "silver_price_realized": True,  # per-oz price; often USD even in SEK statements
+    "gold_price_realized": True,    # per-oz; may be A$/oz or US$/oz — state currency
     "silver_production_oz": False,
     "gold_production_oz": False,
+    "gold_sold_oz": False,
     "zinc_production_t": False,
     "lead_production_t": False,
     "head_grade_gpt": False,
+    "ore_mined_t": False,
     "ore_milled_t": False,
     "recovery_pct": False,
+    "aisc_reported": True,          # per-oz, only when the report states AISC itself
+    "cash_cost_per_oz": True,
 }
 
 
@@ -129,8 +134,61 @@ ANNUAL_SCHEMA = {
     "additionalProperties": False,
 }
 
+# ASX-style: operational quarterly (same envelope as an interim), and
+# half-year / preliminary-final financial reports identified by period end date.
+FIN_PERIOD_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "period_end_date": {"type": "string"},   # YYYY-MM-DD
+        "metrics": _METRICS_OBJ,
+        "notes": {"type": ["string", "null"]},
+    },
+    "required": ["period_end_date", "metrics", "notes"],
+    "additionalProperties": False,
+}
+
 SCHEMAS = {
     "interim_report": INTERIM_SCHEMA,
+    "quarterly_activities": INTERIM_SCHEMA,
     "fs_release": FS_RELEASE_SCHEMA,
+    "half_year_report": FIN_PERIOD_SCHEMA,
+    "fy_report": FIN_PERIOD_SCHEMA,
     "annual_report": ANNUAL_SCHEMA,
 }
+
+
+def _deunion(node):
+    """Anthropic structured outputs allow at most 16 union-typed parameters.
+    Convert every nullable union ("type": [X, "null"]) into an OPTIONAL
+    non-null field: absence then means what null meant. Returns
+    (new_node, is_nullable)."""
+    if isinstance(node, list):
+        return [_deunion(x)[0] for x in node], False
+    if not isinstance(node, dict):
+        return node, False
+    out = dict(node)
+    nullable = False
+    t = out.get("type")
+    if isinstance(t, list):
+        non_null = [x for x in t if x != "null"]
+        nullable = len(non_null) < len(t)
+        out["type"] = non_null[0] if len(non_null) == 1 else non_null
+    if "properties" in out:
+        props = {}
+        optional = set()
+        for k, v in out["properties"].items():
+            newv, is_nullable = _deunion(v)
+            props[k] = newv
+            if is_nullable:
+                optional.add(k)
+        out["properties"] = props
+        out["required"] = [k for k in out.get("required", []) if k not in optional]
+    if "items" in out:
+        out["items"], _ = _deunion(out["items"])
+    return out, nullable
+
+
+def anthropic_schema(doc_type: str) -> dict:
+    """Union-free variant for Claude structured outputs (omitted == null)."""
+    schema, _ = _deunion(SCHEMAS[doc_type])
+    return schema

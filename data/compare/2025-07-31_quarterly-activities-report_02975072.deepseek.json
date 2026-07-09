@@ -1,0 +1,190 @@
+{
+ "revenue": {
+  "value": 20100000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 1,
+  "confidence": "high"
+ },
+ "ebitda": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "ebit": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "net_income": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "equity": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "equity_ratio_pct": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "personnel": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "reported_cost": {
+  "value": 20800000,
+  "currency": "AUD",
+  "unit": "sum of mining, processing, site services",
+  "page": 4,
+  "confidence": "high"
+ },
+ "capex": {
+  "value": 3338000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 5,
+  "confidence": "high"
+ },
+ "depreciation": {
+  "value": 7400000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 4,
+  "confidence": "high"
+ },
+ "interest_expense": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "cash": {
+  "value": 14380000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 1,
+  "confidence": "high"
+ },
+ "debt": {
+  "value": 7800000,
+  "currency": "AUD",
+  "unit": null,
+  "page": 9,
+  "confidence": "high"
+ },
+ "silver_price_realized": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "gold_price_realized": {
+  "value": 5163,
+  "currency": "AUD",
+  "unit": "A$/oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "silver_production_oz": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "gold_production_oz": {
+  "value": 7365,
+  "currency": null,
+  "unit": "oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "gold_sold_oz": {
+  "value": 3900,
+  "currency": null,
+  "unit": "oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "zinc_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "lead_production_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "head_grade_gpt": {
+  "value": 1.04,
+  "currency": null,
+  "unit": "g/t",
+  "page": 4,
+  "confidence": "high"
+ },
+ "ore_mined_t": {
+  "value": null,
+  "currency": null,
+  "unit": null,
+  "page": null,
+  "confidence": "low"
+ },
+ "ore_milled_t": {
+  "value": 254819,
+  "currency": null,
+  "unit": "t",
+  "page": 1,
+  "confidence": "high"
+ },
+ "recovery_pct": {
+  "value": 86,
+  "currency": null,
+  "unit": "%",
+  "page": 4,
+  "confidence": "high"
+ },
+ "aisc_reported": {
+  "value": 3719,
+  "currency": "AUD",
+  "unit": "A$/oz",
+  "page": 4,
+  "confidence": "high"
+ },
+ "cash_cost_per_oz": {
+  "value": 2824,
+  "currency": "AUD",
+  "unit": "A$/oz",
+  "page": 1,
+  "confidence": "high"
+ },
+ "period": {
+  "year": 2025,
+  "quarter": 2
+ },
+ "reporting_currency": "AUD",
+ "notes": "Gold sold for the quarter is stated as 3,900oz on page 1 and 4, but 3,500oz on page 5; the former is used as it is from the summary table. Ore mined in BCM is reported but not tonnes. Personnel costs not separately disclosed. Revenue is sale receipts. Reported cost is sum of mining 9.7M, processing 9.0M, site services 2.1M from Table 1 (all A$M converted to absolute). AISC of 3,719 A$/oz is the 'Project All-in-Sustaining Cost' per ounce for the quarter. Capex is total net expenditure from the capital update table. Debt is drawdown of finance facility; facility limit is 13.27M but drawn amount is 7.8M. Cash is 14.38M as at end of quarter. Gold price realized is average sale price 5,163 A$/oz."
+}

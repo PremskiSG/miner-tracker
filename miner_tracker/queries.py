@@ -6,8 +6,8 @@ import pandas as pd
 
 def companies_frame(conn) -> pd.DataFrame:
     return pd.read_sql_query(
-        "SELECT id, market, ticker, name, reporting_currency, fx_pair FROM companies",
-        conn)
+        "SELECT id, market, ticker, name, reporting_currency, fx_pair, metal "
+        "FROM companies", conn)
 
 
 def metrics_long(conn, company_id: int, quarterly_only: bool = True) -> pd.DataFrame:
@@ -61,35 +61,61 @@ def review_rows(conn, company_id: int) -> pd.DataFrame:
 
 
 def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
-    """Forecast anchors computed from extracted filings:
+    """Forecast anchors computed from extracted filings (metal-aware):
     payability range (reported revenue vs production x realized price, USD),
-    trailing production-weighted AISC (USD/oz), trailing annual interest (USD)."""
+    trailing production-weighted AISC in USD/oz (reported AISC when the company
+    states it, else the (opex + capex)/oz back-calc), trailing annual interest."""
+    metal = conn.execute("SELECT metal FROM companies WHERE id=?",
+                         (company_id,)).fetchone()["metal"]
+    prod_m, price_m = f"{metal}_production_oz", f"{metal}_price_realized"
+
+    def sub(metric: str) -> str:
+        return ("(SELECT value FROM quarterly_metrics WHERE company_id=m.company_id"
+                f" AND period=m.period AND metric='{metric}')")
+
     rows = conn.execute(
-        """SELECT m.period,
-             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
-                AND period=m.period AND metric='reported_cost')          AS cost,
-             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
-                AND period=m.period AND metric='capex')                  AS capex,
-             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
-                AND period=m.period AND metric='silver_production_oz')   AS oz,
-             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
-                AND period=m.period AND metric='silver_price_realized')  AS price,
-             (SELECT value FROM quarterly_metrics WHERE company_id=m.company_id
-                AND period=m.period AND metric='interest_expense')       AS interest,
-             m.value AS revenue, f.rate AS fx
+        f"""SELECT m.period, m.value AS oz, {sub(f'{metal}_sold_oz')} AS sold_oz,
+              {sub('reported_cost')} AS cost, {sub('capex')} AS capex,
+              {sub('revenue')} AS revenue, {sub(price_m)} AS price,
+              {sub('interest_expense')} AS interest,
+              {sub('aisc_reported')} AS aisc_rep,
+              (SELECT currency FROM quarterly_metrics WHERE company_id=m.company_id
+                 AND period=m.period AND metric='aisc_reported') AS aisc_ccy,
+              (SELECT currency FROM quarterly_metrics WHERE company_id=m.company_id
+                 AND period=m.period AND metric='{price_m}') AS price_ccy,
+              f.rate AS fx
            FROM quarterly_metrics m
            JOIN companies c ON c.id = m.company_id
            LEFT JOIN fx_rates f ON f.pair = c.fx_pair AND f.period = m.period
-           WHERE m.company_id = ? AND m.metric = 'revenue' AND m.period LIKE '%-Q%'
+           WHERE m.company_id = ? AND m.metric = '{prod_m}'
+             AND m.period LIKE '%-Q%'
            ORDER BY m.period""", (company_id,)).fetchall()
     rows = [r for r in rows if r["fx"]]
     if not rows:
         return None
-    pays = [(r["revenue"] * r["fx"]) / (r["oz"] * r["price"])
-            for r in rows if r["oz"] and r["price"]]
-    aisc_rows = [r for r in rows if r["cost"] and r["oz"]][-trailing:]
-    aisc = (sum((r["cost"] + (r["capex"] or 0)) * r["fx"] for r in aisc_rows)
-            / sum(r["oz"] for r in aisc_rows)) if aisc_rows else None
+
+    def usd(value, ccy, fx):
+        if value is None:
+            return None
+        return value if (ccy or "USD") == "USD" else value * fx
+
+    pays = []
+    for r in rows:
+        price_usd = usd(r["price"], r["price_ccy"], r["fx"])
+        oz = r["sold_oz"] or r["oz"]   # revenue corresponds to SOLD ounces
+        if r["revenue"] and oz and price_usd:
+            pays.append((r["revenue"] * r["fx"]) / (oz * price_usd))
+
+    rep_rows = [r for r in rows if r["aisc_rep"] and r["oz"]][-trailing:]
+    if rep_rows:  # company states AISC directly — use it
+        aisc = (sum(usd(r["aisc_rep"], r["aisc_ccy"], r["fx"]) * r["oz"]
+                    for r in rep_rows) / sum(r["oz"] for r in rep_rows))
+        aisc_source = "reported"
+    else:
+        drv = [r for r in rows if r["cost"] and r["oz"]][-trailing:]
+        aisc = (sum((r["cost"] + (r["capex"] or 0)) * r["fx"] for r in drv)
+                / sum(r["oz"] for r in drv)) if drv else None
+        aisc_source = "derived"
     int_rows = [r for r in rows if r["interest"] is not None][-trailing:]
     interest = sum(r["interest"] * r["fx"] for r in int_rows) if int_rows else None
     return {
@@ -97,7 +123,9 @@ def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
         "pay_avg": sum(pays) / len(pays) if pays else None,
         "pay_max": max(pays) if pays else None,
         "aisc_usd": aisc,
+        "aisc_source": aisc_source,
         "interest_usd": interest,
+        "metal": metal,
         "n_quarters": len(rows),
     }
 

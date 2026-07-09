@@ -1,0 +1,188 @@
+{
+ "period_end_date": "2025-06-30",
+ "metrics": {
+  "revenue": {
+   "value": 92729639,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "ebitda": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "ebit": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "net_income": {
+   "value": -14002193,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "equity": {
+   "value": 66586072,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 6,
+   "confidence": "high"
+  },
+  "equity_ratio_pct": {
+   "value": 59.2,
+   "currency": null,
+   "unit": "%",
+   "page": 6,
+   "confidence": "medium"
+  },
+  "personnel": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "reported_cost": {
+   "value": 103109624,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "capex": {
+   "value": 4536619,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 8,
+   "confidence": "high"
+  },
+  "depreciation": {
+   "value": 28250000,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 3,
+   "confidence": "medium"
+  },
+  "interest_expense": {
+   "value": 1679099,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 5,
+   "confidence": "high"
+  },
+  "cash": {
+   "value": 14380643,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 6,
+   "confidence": "high"
+  },
+  "debt": {
+   "value": 8319135,
+   "currency": "AUD",
+   "unit": "$",
+   "page": 6,
+   "confidence": "high"
+  },
+  "silver_price_realized": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "gold_price_realized": {
+   "value": 4327,
+   "currency": "AUD",
+   "unit": "$/oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "silver_production_oz": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "gold_production_oz": {
+   "value": 25639,
+   "currency": null,
+   "unit": "oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "gold_sold_oz": {
+   "value": 21342,
+   "currency": null,
+   "unit": "oz",
+   "page": 1,
+   "confidence": "high"
+  },
+  "zinc_production_t": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "lead_production_t": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "head_grade_gpt": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "ore_mined_t": {
+   "value": 1682000,
+   "currency": null,
+   "unit": "t",
+   "page": 3,
+   "confidence": "medium"
+  },
+  "ore_milled_t": {
+   "value": 832831,
+   "currency": null,
+   "unit": "t",
+   "page": 1,
+   "confidence": "high"
+  },
+  "recovery_pct": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  },
+  "aisc_reported": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "high"
+  },
+  "cash_cost_per_oz": {
+   "value": null,
+   "currency": null,
+   "unit": null,
+   "page": null,
+   "confidence": "low"
+  }
+ },
+ "notes": "Reported cost of goods sold (COGS) of $103.11m includes depreciation and amortisation of $28.25m. Total wages of $14.94m are embedded in COGS. Mined volumes in BCM (bank cubic metres) of 1,682,000 converted to tonnes; ore milled of 832,831 DMT (dry metric tonnes) as stated. Debt comprises plant and equipment loans: current $3.27m + non-current $5.05m = $8.32m. Equity ratio calculated as Total Equity / Total Assets = 66,586,072 / 112,324,393 = 59.3%. No mill recovery percentage, head grade g/t, AISC, or cash cost per ounce explicitly stated in the report. Gold price realized is average for the year of $4,327/oz AUD as stated."
+}

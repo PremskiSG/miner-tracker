@@ -24,8 +24,8 @@ value_col = "value_usd" if usd else "value"
 
 available = sorted(long["metric"].unique())
 default = [m for m in ["revenue", "ebitda", "net_income", "silver_production_oz",
-                       "aisc_derived", "head_grade_gpt", "ore_milled_t",
-                       "tpd_derived"]
+                       "gold_production_oz", "aisc_reported", "aisc_derived",
+                       "head_grade_gpt", "ore_milled_t", "tpd_derived"]
            if m in available]
 selected = st.multiselect("Metrics", available, default=default)
 

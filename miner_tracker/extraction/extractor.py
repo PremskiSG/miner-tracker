@@ -11,6 +11,7 @@ from pathlib import Path
 
 import anthropic
 
+from miner_tracker.extraction.parsing import normalize, parse_json
 from miner_tracker.extraction.prompts import PROMPTS, SYSTEM
 from miner_tracker.extraction.schemas import SCHEMAS
 from miner_tracker.secrets import anthropic_api_key
@@ -50,14 +51,22 @@ def cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
 
 
 def extract_pdf(pdf_path: Path, doc_type: str, company_name: str,
-                published_date: str, model: str, max_tokens: int = 8192) -> ExtractionResult:
-    """Send one PDF to Claude and return the schema-validated dict.
+                published_date: str, model: str, max_tokens: int = 8192,
+                metal: str = "silver") -> ExtractionResult:
+    """Send one PDF to Claude (native PDF input) and return the normalized dict.
 
+    The metric envelope exceeds structured-outputs' union/optional limits, so
+    the schema is embedded in the prompt and the response normalized — same as
+    the DeepSeek path, keeping the provider comparison apples-to-apples.
     Raises anthropic.* API errors and ValueError (unparseable JSON) — the
     pipeline decides whether to escalate to the fallback model.
     """
-    schema = SCHEMAS[doc_type]
-    prompt = PROMPTS[doc_type](company_name, published_date)
+    prompt = (
+        PROMPTS[doc_type](company_name, published_date, metal)
+        + "\n\nRespond with ONLY a JSON object (no prose, no markdown fences) "
+        "that conforms exactly to this JSON schema:\n"
+        + json.dumps(SCHEMAS[doc_type])
+    )
     pdf_b64 = base64.standard_b64encode(pdf_path.read_bytes()).decode("ascii")
 
     client = _client()
@@ -74,7 +83,6 @@ def extract_pdf(pdf_path: Path, doc_type: str, company_name: str,
                 {"type": "text", "text": prompt},
             ],
         }],
-        output_config={"format": {"type": "json_schema", "schema": schema}},
     )
     if response.stop_reason == "refusal":
         raise ValueError("model refused the request")
@@ -82,7 +90,7 @@ def extract_pdf(pdf_path: Path, doc_type: str, company_name: str,
         raise ValueError("output truncated at max_tokens")
 
     text = next((b.text for b in response.content if b.type == "text"), "")
-    data = json.loads(text)  # json_schema output_config guarantees valid JSON
+    data = normalize(parse_json(text), doc_type)
     usage = response.usage
     return ExtractionResult(
         data=data,
