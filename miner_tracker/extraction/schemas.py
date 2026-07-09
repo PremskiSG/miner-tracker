@@ -152,6 +152,7 @@ FIN_PERIOD_SCHEMA = {
 SCHEMAS = {
     "interim_report": INTERIM_SCHEMA,
     "quarterly_activities": INTERIM_SCHEMA,
+    "annual_mda": INTERIM_SCHEMA,          # SEDAR annual MD&A -> Q4 quarter column
     "fs_release": FS_RELEASE_SCHEMA,
     "half_year_report": FIN_PERIOD_SCHEMA,
     "fy_report": FIN_PERIOD_SCHEMA,

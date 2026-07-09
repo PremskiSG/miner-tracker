@@ -23,8 +23,9 @@ def main(argv: list[str] | None = None) -> int:
     ex.add_argument("--dry-run", action="store_true")
     ex.add_argument("--limit", type=int, help="max documents this run")
     ex.add_argument("--type", dest="doc_type",
-                    choices=["interim_report", "quarterly_activities", "fs_release",
-                             "half_year_report", "fy_report", "annual_report"],
+                    choices=["interim_report", "quarterly_activities", "annual_mda",
+                             "fs_release", "half_year_report", "fy_report",
+                             "annual_report"],
                     help="only documents of this type")
     ex.add_argument("--provider", choices=["anthropic", "deepseek"],
                     help="override config provider (with its default model)")

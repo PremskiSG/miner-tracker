@@ -59,7 +59,7 @@ def normalize(data: dict, doc_type: str) -> dict:
             "metrics": _norm_metrics_block(data.get("metrics") or data),
             "notes": data.get("notes"),
         }
-    if doc_type in ("interim_report", "quarterly_activities"):
+    if doc_type in ("interim_report", "quarterly_activities", "annual_mda"):
         period = data.get("period") or {}
         out = _norm_metrics_block(data)
         out["period"] = {"year": int(period.get("year", 0)),

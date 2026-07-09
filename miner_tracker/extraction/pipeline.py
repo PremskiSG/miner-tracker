@@ -21,6 +21,10 @@ _KIND_MAP = {
     "half-year-report": "interim_report",
     "financial-statement-release": "fs_release",
     "quarterly-activities-report": "quarterly_activities",
+    # SEDAR (Canada): MD&A carries the operating+financial table; the paired
+    # financial-statements PDFs are unmapped -> skipped (MD&A covers them).
+    "interim-md-a": "interim_report",
+    "management-s-discussion-analysis-md-a": "annual_mda",
 }
 
 # (prefix, doc_type) rules for kinds that embed years/suffixes, e.g.
@@ -31,7 +35,9 @@ _KIND_PREFIXES = [
     ("annual-report", "annual_report"),
 ]
 
-_FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_([a-z0-9\-]+)_[0-9a-f]+\.pdf$")
+# date_kind_suffix. kind is greedy up to the LAST underscore so multi-word kinds
+# work; suffix is the source hash (may contain hyphens, e.g. 'da-en-2eed').
+_FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_(.+)_([a-z0-9\-]+)\.pdf$")
 
 
 def doc_type_for_kind(kind: str) -> str | None:
@@ -97,8 +103,8 @@ def sync(conn) -> int:
 def expected_period(published_date: str, doc_type: str) -> str:
     """Infer the report's fiscal quarter from the publication date."""
     d = datetime.strptime(published_date, "%Y-%m-%d")
-    if doc_type == "fs_release":
-        # FS releases come out Jan-Mar and cover the prior year's Q4
+    if doc_type in ("fs_release", "annual_mda"):
+        # Year-end reports come out Jan-May and cover the prior year's Q4
         year = d.year - 1 if d.month <= 6 else d.year
         return f"{year}-Q4"
     if d.month <= 2:
@@ -256,7 +262,7 @@ def _store(conn, doc, company_cfg: dict, data: dict) -> None:
                        Path(doc["path"]).name, currency,
                        company_cfg["reporting_currency"])
 
-    if doc["doc_type"] in ("interim_report", "quarterly_activities"):
+    if doc["doc_type"] in ("interim_report", "quarterly_activities", "annual_mda"):
         p = data["period"]
         period = f"{p['year']}-Q{p['quarter']}"
         exp = expected_period(doc["published_date"], doc["doc_type"])

@@ -50,12 +50,32 @@ def _glossary(metal: str) -> str:
 
 def interim_prompt(company: str, published_date: str, metal: str = "silver") -> str:
     return (
-        f"This is a quarterly interim report from {company}, a {metal} mining "
-        f"company, published {published_date}. Extract the metrics for THE QUARTER "
-        "ONLY — not year-to-date, not full year. If the report shows both a "
-        "cumulative column (e.g. '1-9/2025' or 'January – September') and a quarter "
-        "column (e.g. '7-9/2025' or 'July – September'), use the quarter column. "
-        "Also return which fiscal quarter the report covers. " + _glossary(metal)
+        f"This is a quarterly interim report / MD&A from {company}, a {metal} "
+        f"mining company, published {published_date}. Extract the metrics for THE "
+        "CURRENT QUARTER ONLY — not year-to-date, not full year, and NEVER the "
+        "prior-year comparative. If the report shows a cumulative column (e.g. "
+        "'1-9/2025' or 'January – September'), use the three-month quarter column "
+        "instead. If it shows a 'Three-month period ended {date}' table with the "
+        "current year and the prior year side by side (e.g. columns headed 2026 "
+        "and 2025), use the CURRENT-year column (the most recent period). Return "
+        "which calendar quarter the report covers (period end 'March 31' -> Q1, "
+        "'June 30' -> Q2, 'September 30' -> Q3, 'December 31' -> Q4). "
+        + _glossary(metal)
+    )
+
+
+def annual_mda_prompt(company: str, published_date: str, metal: str = "gold") -> str:
+    return (
+        f"This is an ANNUAL MD&A from {company}, a {metal} mining company, "
+        f"published {published_date}. Its key operating/financial table shows a "
+        "'Three-month period ended December 31' column (the FOURTH QUARTER) NEXT "
+        "TO a 'Year ended December 31' column (the full year), each with a "
+        "current-year and prior-year sub-column. Extract ONLY the CURRENT-YEAR "
+        "FOURTH-QUARTER (three months ended December 31) figures — NEVER the "
+        "full-year column and NEVER the prior year. The full-year number will be "
+        "roughly 4x the quarter; if a value looks like a full-year total, you "
+        "picked the wrong column. Return year = the year that just ended and "
+        "quarter = 4. " + _glossary(metal)
     )
 
 
@@ -138,6 +158,7 @@ def annual_prompt(company: str, published_date: str, metal: str = "silver") -> s
 PROMPTS = {
     "interim_report": interim_prompt,
     "quarterly_activities": quarterly_activities_prompt,
+    "annual_mda": annual_mda_prompt,
     "fs_release": fs_release_prompt,
     "half_year_report": half_year_prompt,
     "fy_report": fy_prompt,

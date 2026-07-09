@@ -25,3 +25,9 @@ companies:
     reporting_currency: AUD
     fx_pair: AUDUSD
     metal: gold
+  - market: CA
+    ticker: SOMA
+    name: Soma Gold
+    reporting_currency: CAD
+    fx_pair: CADUSD
+    metal: gold

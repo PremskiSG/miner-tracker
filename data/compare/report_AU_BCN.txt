@@ -1,12 +1,98 @@
 # AU_BCN: A=deepseek-v4-pro  vs  B=deepseek-v4-flash
 
 === 2024-08-01_quarterly-activities-report_02835157.pdf (quarterly_activities)
-  deepseek-v4-pro      ok    16.4s  $0.0012  11 fields  (81+1351 tok)
-  deepseek-v4-flash    ok    10.6s  $0.0046  12 fields  (30801+1172 tok)
-    ! cash_cost_per_oz: deepseek-v4-pro=1937  deepseek-v4-flash=3471   <-- DISAGREE
+  deepseek-v4-pro      ok    19.6s  $0.0013  11 fields  (81+1418 tok)
+  deepseek-v4-flash    ok    10.9s  $0.0004  13 fields  (81+1222 tok)
+    ~ aisc_reported: deepseek-v4-pro=None  deepseek-v4-flash=4593   <-- ONLY B
+    ! capex: deepseek-v4-pro=8885000.0  deepseek-v4-flash=11340000   <-- DISAGREE
     ~ debt: deepseek-v4-pro=None  deepseek-v4-flash=9400000   <-- ONLY B
 
+=== 2024-08-30_appendix-4e-preliminary-final-report_02847994.pdf (fy_report)
+  deepseek-v4-pro      ok    13.1s  $0.0011  13 fields  (25+1243 tok)
+  deepseek-v4-flash    ok     6.2s  $0.0002  14 fields  (25+827 tok)
+    ~ depreciation: deepseek-v4-pro=None  deepseek-v4-flash=13080000   <-- ONLY B
+    ! net_income: deepseek-v4-pro=8735033  deepseek-v4-flash=9142485   <-- DISAGREE
+
+=== 2024-09-24_annual-report-to-shareholders_02857608.pdf (annual_report)
+  deepseek-v4-pro      ok    31.8s  $0.0024  60 fields  (20+2711 tok)
+  deepseek-v4-flash    ok    24.6s  $0.0008  60 fields  (20+2956 tok)
+    ~ 2023-06-30|geko - stockpiles|probable|gold|grade: deepseek-v4-pro=1.3  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2023-06-30|geko - stockpiles|probable|gold|tonnage: deepseek-v4-pro=20000.0  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2023-06-30|geko - stockpiles|proved|gold|grade: deepseek-v4-pro=0.9  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2023-06-30|geko - stockpiles|proved|gold|tonnage: deepseek-v4-pro=300000.0  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2023-06-30|geko ‐ stockpiles|probable|gold|grade: deepseek-v4-pro=None  deepseek-v4-flash=1.3   <-- ONLY B
+    ~ 2023-06-30|geko ‐ stockpiles|probable|gold|tonnage: deepseek-v4-pro=None  deepseek-v4-flash=20000   <-- ONLY B
+    ~ 2023-06-30|geko ‐ stockpiles|proved|gold|grade: deepseek-v4-pro=None  deepseek-v4-flash=0.9   <-- ONLY B
+    ~ 2023-06-30|geko ‐ stockpiles|proved|gold|tonnage: deepseek-v4-pro=None  deepseek-v4-flash=300000   <-- ONLY B
+    ~ 2024-06-30|geko - stockpiles|proved|gold|grade: deepseek-v4-pro=0.9  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2024-06-30|geko - stockpiles|proved|gold|tonnage: deepseek-v4-pro=95000.0  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2024-06-30|geko ‐ stockpiles|proved|gold|grade: deepseek-v4-pro=None  deepseek-v4-flash=0.9   <-- ONLY B
+    ~ 2024-06-30|geko ‐ stockpiles|proved|gold|tonnage: deepseek-v4-pro=None  deepseek-v4-flash=95000   <-- ONLY B
+
+=== 2024-10-30_quarterly-activities-report_02875053.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    18.9s  $0.0012  14 fields  (55+1334 tok)
+  deepseek-v4-flash    ok    11.8s  $0.0004  14 fields  (55+1244 tok)
+    ! recovery_pct: deepseek-v4-pro=88  deepseek-v4-flash=88.5   <-- DISAGREE
+
+=== 2025-01-31_quarterly-activities-report_02909393.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    16.5s  $0.0011  14 fields  (69+1271 tok)
+  deepseek-v4-flash    ok    12.9s  $0.0004  14 fields  (69+1345 tok)
+
+=== 2025-02-27_appendix-4d-and-2024-half-year-financial-report_02920313.pdf (half_year_report)
+  deepseek-v4-pro      ok    17.4s  $0.0012  17 fields  (17+1418 tok)
+  deepseek-v4-flash    ok    11.4s  $0.0004  18 fields  (17+1308 tok)
+    ! net_income: deepseek-v4-pro=-4632526  deepseek-v4-flash=-7280066   <-- DISAGREE
+    ~ recovery_pct: deepseek-v4-pro=None  deepseek-v4-flash=1.02   <-- ONLY B
+
+=== 2025-04-28_quarterly-activities-report_02941361.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    14.3s  $0.0012  14 fields  (30+1310 tok)
+  deepseek-v4-flash    ok     8.2s  $0.0003  14 fields  (30+1185 tok)
+
+=== 2025-07-31_quarterly-activities-report_02975072.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    14.5s  $0.0012  15 fields  (62+1346 tok)
+  deepseek-v4-flash    ok     6.2s  $0.0002  15 fields  (62+808 tok)
+
+=== 2025-08-29_appendix-4e-preliminary-final-report_02988645.pdf (fy_report)
+  deepseek-v4-pro      ok    12.9s  $0.0012  13 fields  (79+1302 tok)
+  deepseek-v4-flash    ok     6.1s  $0.0002  11 fields  (79+755 tok)
+    ~ debt: deepseek-v4-pro=8319135  deepseek-v4-flash=None   <-- ONLY A
+    ~ depreciation: deepseek-v4-pro=28250000  deepseek-v4-flash=None   <-- ONLY A
+
+=== 2025-09-05_annual-report-to-shareholders_02991898.pdf (annual_report)
+  deepseek-v4-pro      ok    51.5s  $0.0036  66 fields  (114+4112 tok)
+  deepseek-v4-flash    ok    32.9s  $0.0007  58 fields  (114+2396 tok)
+    ~ 2024-06-30||probable|gold|grade: deepseek-v4-pro=1.6  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2024-06-30||probable|gold|tonnage: deepseek-v4-pro=1354000.0  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2024-06-30||proved|gold|grade: deepseek-v4-pro=1.1  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2024-06-30||proved|gold|tonnage: deepseek-v4-pro=1928000.0  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2025-06-30||probable|gold|grade: deepseek-v4-pro=1.3  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2025-06-30||probable|gold|tonnage: deepseek-v4-pro=4399000.0  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2025-06-30||proved|gold|grade: deepseek-v4-pro=1.1  deepseek-v4-flash=None   <-- ONLY A
+    ~ 2025-06-30||proved|gold|tonnage: deepseek-v4-pro=1930000.0  deepseek-v4-flash=None   <-- ONLY A
+
+=== 2025-10-31_quarterly-activities-report_03019246.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    14.9s  $0.0011  15 fields  (117+1246 tok)
+  deepseek-v4-flash    ok     9.2s  $0.0004  14 fields  (117+1194 tok)
+    ! capex: deepseek-v4-pro=3234000.0  deepseek-v4-flash=3200000   <-- DISAGREE
+    ~ debt: deepseek-v4-pro=9720000.0  deepseek-v4-flash=None   <-- ONLY A
+
+=== 2026-01-30_quarterly-activities-report_03055270.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    15.0s  $0.0012  15 fields  (38+1340 tok)
+  deepseek-v4-flash    ok     8.6s  $0.0004  15 fields  (38+1260 tok)
+    ! capex: deepseek-v4-pro=4653000  deepseek-v4-flash=9400000   <-- DISAGREE
+
+=== 2026-02-27_appendix-4d-and-2025-half-year-financial-report_03066761.pdf (half_year_report)
+  deepseek-v4-pro      ok    16.7s  $0.0013  16 fields  (115+1417 tok)
+  deepseek-v4-flash    ok     9.1s  $0.0003  18 fields  (115+1009 tok)
+    ~ head_grade_gpt: deepseek-v4-pro=None  deepseek-v4-flash=1.13   <-- ONLY B
+    ~ recovery_pct: deepseek-v4-pro=None  deepseek-v4-flash=86.5   <-- ONLY B
+    ! reported_cost: deepseek-v4-pro=54927556  deepseek-v4-flash=53816899   <-- DISAGREE
+
+=== 2026-04-30_quarterly-activities-report_03088979.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    14.5s  $0.0012  14 fields  (51+1309 tok)
+  deepseek-v4-flash    ok     8.2s  $0.0003  14 fields  (51+1180 tok)
+
 === TOTALS
-  deepseek-v4-pro      cost $0.001  time 16s  failures 0  fields extracted 11
-  deepseek-v4-flash    cost $0.005  time 11s  failures 0  fields extracted 12
-  10 agree, 1 disagree, 0 only-deepseek-v4-pro, 1 only-deepseek-v4-flash
+  deepseek-v4-pro      cost $0.020  time 272s  failures 0  fields extracted 297
+  deepseek-v4-flash    cost $0.005  time 166s  failures 0  fields extracted 292
+  273 agree, 7 disagree, 17 only-deepseek-v4-pro, 12 only-deepseek-v4-flash

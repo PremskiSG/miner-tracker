@@ -1,6 +1,6 @@
 {
  "revenue": {
-  "value": 14710000,
+  "value": 14710000.0,
   "currency": "AUD",
   "unit": "absolute",
   "page": 1,
@@ -56,11 +56,11 @@
   "confidence": "low"
  },
  "capex": {
-  "value": 11336000,
+  "value": 8885000.0,
   "currency": "AUD",
   "unit": "absolute",
   "page": 3,
-  "confidence": "high"
+  "confidence": "medium"
  },
  "depreciation": {
   "value": null,
@@ -77,7 +77,7 @@
   "confidence": "low"
  },
  "cash": {
-  "value": 5880000,
+  "value": 5880000.0,
   "currency": "AUD",
   "unit": "absolute",
   "page": 1,
@@ -98,7 +98,7 @@
   "confidence": "low"
  },
  "gold_price_realized": {
-  "value": 3550,
+  "value": 3550.0,
   "currency": "AUD",
   "unit": "AUD/oz",
   "page": 1,
@@ -112,15 +112,15 @@
   "confidence": "low"
  },
  "gold_production_oz": {
-  "value": 3930,
-  "currency": "AUD",
+  "value": 3930.0,
+  "currency": null,
   "unit": "oz",
   "page": 1,
   "confidence": "high"
  },
  "gold_sold_oz": {
-  "value": 4144,
-  "currency": "AUD",
+  "value": 4144.0,
+  "currency": null,
   "unit": "oz",
   "page": 1,
   "confidence": "high"
@@ -142,7 +142,7 @@
  "head_grade_gpt": {
   "value": 0.88,
   "currency": null,
-  "unit": "g/t",
+  "unit": "gpt",
   "page": 3,
   "confidence": "high"
  },
@@ -154,16 +154,16 @@
   "confidence": "low"
  },
  "ore_milled_t": {
-  "value": 160848,
+  "value": 160848.0,
   "currency": null,
   "unit": "tonnes",
   "page": 1,
   "confidence": "high"
  },
  "recovery_pct": {
-  "value": 86,
+  "value": 86.0,
   "currency": null,
-  "unit": "%",
+  "unit": "percent",
   "page": 1,
   "confidence": "high"
  },
@@ -175,7 +175,7 @@
   "confidence": "low"
  },
  "cash_cost_per_oz": {
-  "value": 1937,
+  "value": 1937.0,
   "currency": "AUD",
   "unit": "AUD/oz",
   "page": 3,
@@ -186,5 +186,5 @@
   "quarter": 2
  },
  "reporting_currency": "AUD",
- "notes": "Revenue calculated from gold sales of 4,144 ounces at an average sale price of $3,550/oz, resulting in sale receipts of $14.71 million (page 1). Capex reported as A$11.34 million for the quarter (page 1, detailed table page 3). Cash cost per ounce of A$1,937 from the cost summary table (page 3), which excludes royalties and pre-strip costs. AISC per ounce is not explicitly stated; total sustaining costs (excluding capital expenditure) are provided but not on a per-ounce basis. Ore mined is stated in BCM only (page 3), so tonnage is unknown. The realized gold price of $3,550/oz is from page 1; a separate average sale price of $3,544/oz appears in the table on page 3, likely due to rounding. Interest expense, net income, EBITDA, EBIT, equity, personnel, depreciation, and debt are not reported in the document."
+ "notes": "Cash costs exclude royalties and stock adjustments per page 1, but cash cost per oz used from cost summary table page 3. AISC not explicitly stated; Sustaining costs excluding capital expenditure reported as $4,593/oz on page 3 but it includes corporate costs, pre-strip, royalties and stock movements, so not a standard AISC. Revenue from gold sales: $14.71 million. Capex total net expenditure $8.885 million. Gold sales 4,144 oz at avg price $3,550/oz. Gold production 3,930 oz. Ore milled 160,848 tonnes. Head grade 0.88 gpt. Recovery 86%. Cash at end of quarter $5.88 million. Ore mined stated in BCM, no tonnage available. Finance facility drawn $9.4 million but total facility $11.1 million, not total debt. Personnel not stated. Operating cash cost $3,471/oz on page 1 includes pre-strip, but cost summary cash cost $1,937/oz excludes pre-strip; page 1 figure noted but cost-summary figure may better represent site costs. No EBITDA, EBIT, net income, equity, depreciation, interest expense, or silver production reported."
 }

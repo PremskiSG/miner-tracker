@@ -1,10 +1,10 @@
 {
  "revenue": {
   "value": 14710000,
-  "currency": "AUD",
-  "unit": "A$",
+  "currency": "A$",
+  "unit": "absolute",
   "page": 1,
-  "confidence": "high"
+  "confidence": "medium"
  },
  "ebitda": {
   "value": null,
@@ -57,9 +57,9 @@
  },
  "capex": {
   "value": 11340000,
-  "currency": "AUD",
-  "unit": "A$",
-  "page": 1,
+  "currency": "A$",
+  "unit": "absolute",
+  "page": 3,
   "confidence": "high"
  },
  "depreciation": {
@@ -78,17 +78,17 @@
  },
  "cash": {
   "value": 5880000,
-  "currency": "AUD",
-  "unit": "A$",
-  "page": 1,
+  "currency": "A$",
+  "unit": "absolute",
+  "page": 11,
   "confidence": "high"
  },
  "debt": {
   "value": 9400000,
-  "currency": "AUD",
-  "unit": "A$",
+  "currency": "A$",
+  "unit": "absolute",
   "page": 10,
-  "confidence": "medium"
+  "confidence": "high"
  },
  "silver_price_realized": {
   "value": null,
@@ -98,10 +98,10 @@
   "confidence": "low"
  },
  "gold_price_realized": {
-  "value": 3550,
-  "currency": "AUD",
-  "unit": "A$/oz",
-  "page": 1,
+  "value": 3544,
+  "currency": "A$",
+  "unit": "per_oz",
+  "page": 3,
   "confidence": "high"
  },
  "silver_production_oz": {
@@ -113,14 +113,14 @@
  },
  "gold_production_oz": {
   "value": 3930,
-  "currency": "AUD",
+  "currency": null,
   "unit": "oz",
   "page": 3,
   "confidence": "high"
  },
  "gold_sold_oz": {
   "value": 4144,
-  "currency": "AUD",
+  "currency": null,
   "unit": "oz",
   "page": 3,
   "confidence": "high"
@@ -141,7 +141,7 @@
  },
  "head_grade_gpt": {
   "value": 0.88,
-  "currency": "AUD",
+  "currency": null,
   "unit": "g/t",
   "page": 3,
   "confidence": "high"
@@ -150,12 +150,12 @@
   "value": null,
   "currency": null,
   "unit": null,
-  "page": null,
+  "page": 3,
   "confidence": "low"
  },
  "ore_milled_t": {
   "value": 160848,
-  "currency": "AUD",
+  "currency": null,
   "unit": "t",
   "page": 3,
   "confidence": "high"
@@ -163,28 +163,28 @@
  "recovery_pct": {
   "value": 86,
   "currency": null,
-  "unit": "%",
+  "unit": "percent",
   "page": 1,
-  "confidence": "medium"
+  "confidence": "high"
  },
  "aisc_reported": {
-  "value": null,
-  "currency": null,
-  "unit": null,
-  "page": null,
-  "confidence": "low"
+  "value": 4593,
+  "currency": "A$",
+  "unit": "per_oz",
+  "page": 3,
+  "confidence": "high"
  },
  "cash_cost_per_oz": {
-  "value": 3471,
-  "currency": "AUD",
-  "unit": "A$/oz",
-  "page": 1,
-  "confidence": "medium"
+  "value": 1937,
+  "currency": "A$",
+  "unit": "per_oz",
+  "page": 3,
+  "confidence": "high"
  },
  "period": {
   "year": 2024,
   "quarter": 2
  },
- "reporting_currency": "AUD",
- "notes": null
+ "reporting_currency": "A$",
+ "notes": "Ore mined is reported in BCM, not tonnes, so ore_mined_t is null. Reported_cost not provided as a total line (only cash cost per oz and other per-oz lines). Debt is drawn finance facility. Cash is from corporate update."
 }

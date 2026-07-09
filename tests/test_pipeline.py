@@ -48,6 +48,36 @@ def test_asx_kind_mapping_and_filenames():
         assert pipeline.doc_type_for_kind(m.group(2)) == expected, fname
 
 
+def test_sedar_kind_mapping_and_filenames():
+    cases = {
+        "2026-05-28_interim-md-a_da-en-2eed.pdf": "interim_report",
+        "2025-04-30_management-s-discussion-analysis-md-a_glish-0801.pdf": "annual_mda",
+        # the paired financial-statements PDFs are unmapped -> skipped
+        "2026-05-28_interim-financial-statements_rt-en-917c.pdf": None,
+        "2026-04-30_financial-statements_ts-en-712a.pdf": None,
+    }
+    for fname, expected in cases.items():
+        m = pipeline._FILENAME_RE.match(fname)
+        assert m, fname
+        assert pipeline.doc_type_for_kind(m.group(2)) == expected, fname
+    # regex still parses the older hex-suffixed names correctly
+    m = pipeline._FILENAME_RE.match("2025-07-31_interim-report_01b25cd0dd.pdf")
+    assert m.group(2) == "interim-report" and m.group(3) == "01b25cd0dd"
+    m = pipeline._FILENAME_RE.match(
+        "2026-02-27_appendix-4d-and-2025-half-year-financial-report_03066761.pdf")
+    assert m.group(2) == "appendix-4d-and-2025-half-year-financial-report"
+
+
+def test_annual_mda_period_is_prior_q4():
+    # SEDAR annual MD&A filed Apr/May covers the prior calendar year's Q4
+    assert pipeline.expected_period("2026-05-01", "annual_mda") == "2025-Q4"
+    assert pipeline.expected_period("2025-04-30", "annual_mda") == "2024-Q4"
+    # interim MD&A cadence (period end ~2 months before filing)
+    assert pipeline.expected_period("2026-05-28", "interim_report") == "2026-Q1"
+    assert pipeline.expected_period("2025-08-28", "interim_report") == "2025-Q2"
+    assert pipeline.expected_period("2025-11-28", "interim_report") == "2025-Q3"
+
+
 def test_fin_period_label():
     assert pipeline.fin_period_label("half_year_report", "2025-12-31") == "2025-H2"
     assert pipeline.fin_period_label("half_year_report", "2024-06-30") == "2024-H1"
