@@ -4,3 +4,4 @@ __pycache__/
 secrets.yaml
 .DS_Store
 # the sqlite db IS committed — it's the website's data layer on Streamlit Cloud
+data/compare/
