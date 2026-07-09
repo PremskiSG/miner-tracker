@@ -76,7 +76,16 @@ def annual_mda_prompt(company: str, published_date: str, metal: str = "gold") ->
         "full-year column and NEVER the prior year. The full-year number will be "
         "roughly 4x the quarter; if a value looks like a full-year total, you "
         "picked the wrong column. Return year = the year that just ended and "
-        "quarter = 4. " + _glossary(metal)
+        "quarter = 4. "
+        "ALSO extract the Mineral Reserves and/or Resources statement if the MD&A "
+        "contains one (into the 'reserves' array; use [] if absent): one row per "
+        f"category (measured/indicated/inferred/proven_probable) PER PROJECT or "
+        "deposit — set 'project' to the deposit name (e.g. 'Cordero', 'Nechi') and "
+        "SKIP any 'Total'/'subtotal' rows so projects are not double-counted. Give "
+        f"tonnage in tonnes, the {metal} grade in g/t, the metal, and the "
+        "estimate's EFFECTIVE date (statement_date, YYYY-MM-DD — often stated as "
+        "'effective date of ...' for the technical report, NOT the filing date). "
+        + _glossary(metal)
     )
 
 

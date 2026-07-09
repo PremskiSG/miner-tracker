@@ -149,10 +149,25 @@ FIN_PERIOD_SCHEMA = {
     "additionalProperties": False,
 }
 
+# SEDAR annual MD&A: the Q4 quarter column AND the embedded mineral
+# reserves/resources statement (Canadian MD&As restate it each year).
+ANNUAL_MDA_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "period": _PERIOD,
+        "reporting_currency": {"type": "string"},
+        **_metrics_block(),
+        "reserves": ANNUAL_SCHEMA["properties"]["reserves"],
+        "notes": {"type": ["string", "null"]},
+    },
+    "required": ["period", "reporting_currency", *METRIC_DEFS, "reserves", "notes"],
+    "additionalProperties": False,
+}
+
 SCHEMAS = {
     "interim_report": INTERIM_SCHEMA,
     "quarterly_activities": INTERIM_SCHEMA,
-    "annual_mda": INTERIM_SCHEMA,          # SEDAR annual MD&A -> Q4 quarter column
+    "annual_mda": ANNUAL_MDA_SCHEMA,       # Q4 quarter column + reserves statement
     "fs_release": FS_RELEASE_SCHEMA,
     "half_year_report": FIN_PERIOD_SCHEMA,
     "fy_report": FIN_PERIOD_SCHEMA,

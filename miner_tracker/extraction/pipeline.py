@@ -271,6 +271,8 @@ def _store(conn, doc, company_cfg: dict, data: dict) -> None:
                            Path(doc["path"]).name, period, exp)
             doc_review = True
         _write_metrics(conn, cid, period, data, currency, doc["id"], doc_review)
+        if doc["doc_type"] == "annual_mda":  # SEDAR MD&A also embeds reserves
+            _store_reserves(conn, cid, doc, data)
         conn.execute("UPDATE documents SET period=? WHERE id=?", (period, doc["id"]))
 
     elif doc["doc_type"] in ("half_year_report", "fy_report"):
@@ -301,21 +303,26 @@ def _store(conn, doc, company_cfg: dict, data: dict) -> None:
                      (f"{year}-Q4", doc["id"]))
 
     elif doc["doc_type"] == "annual_report":
-        # replace this document's rows wholesale — project/category keys can
-        # change between extractions, so upsert alone would leave stale rows
-        db.clear_reserves_for_doc(conn, doc["id"])
-        for r in data.get("reserves", []):
-            category = _CATEGORY_MAP.get(r["category"])
-            if category is None or (r["tonnage_t"] is None and r["grade_gpt"] is None):
-                continue
-            metal = (r.get("metal") or "silver").lower()
-            db.upsert_reserves(conn, cid, r["statement_date"], category,
-                               r["tonnage_t"], r["grade_gpt"], doc["id"],
-                               r.get("confidence"),
-                               metal=_METAL_MAP.get(metal, metal),
-                               project=str(r.get("project") or ""))
+        _store_reserves(conn, cid, doc, data)
         conn.execute("UPDATE documents SET period=? WHERE id=?",
                      (str(data["fiscal_year"]), doc["id"]))
+
+
+def _store_reserves(conn, cid: int, doc, data: dict) -> None:
+    """Write the reserves/resources rows from an annual report or SEDAR MD&A.
+    Replaces this document's rows wholesale — project/category keys can change
+    between extractions, so upsert alone would leave stale rows."""
+    db.clear_reserves_for_doc(conn, doc["id"])
+    for r in data.get("reserves", []):
+        category = _CATEGORY_MAP.get(r["category"])
+        if category is None or (r["tonnage_t"] is None and r["grade_gpt"] is None):
+            continue
+        metal = (r.get("metal") or "silver").lower()
+        db.upsert_reserves(conn, cid, r["statement_date"], category,
+                           r["tonnage_t"], r["grade_gpt"], doc["id"],
+                           r.get("confidence"),
+                           metal=_METAL_MAP.get(metal, metal),
+                           project=str(r.get("project") or ""))
 
 
 def extract_pending(conn, company: str | None = None, doc_path: str | None = None,

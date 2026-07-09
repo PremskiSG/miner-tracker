@@ -66,6 +66,8 @@ def normalize(data: dict, doc_type: str) -> dict:
                          "quarter": int(period.get("quarter", 0))}
         out["reporting_currency"] = data.get("reporting_currency") or ""
         out["notes"] = data.get("notes")
+        if doc_type == "annual_mda":  # SEDAR annual MD&A also carries reserves
+            out["reserves"] = _norm_reserves(data)
         return out
     if doc_type == "fs_release":
         return {
@@ -76,21 +78,25 @@ def normalize(data: dict, doc_type: str) -> dict:
             "notes": data.get("notes"),
         }
     if doc_type == "annual_report":
-        reserves = []
-        for r in data.get("reserves") or []:
-            if not isinstance(r, dict):
-                continue
-            reserves.append({
-                "statement_date": str(r.get("statement_date") or ""),
-                "project": str(r.get("project") or ""),
-                "category": r.get("category") or "",
-                "metal": r.get("metal") or "silver",
-                "tonnage_t": r.get("tonnage_t"),
-                "grade_gpt": r.get("grade_gpt"),
-                "page": r.get("page"),
-                "confidence": r.get("confidence")
-                if r.get("confidence") in ("high", "medium", "low") else "low",
-            })
         return {"fiscal_year": int(data.get("fiscal_year", 0)),
-                "reserves": reserves, "notes": data.get("notes")}
+                "reserves": _norm_reserves(data), "notes": data.get("notes")}
     raise ValueError(f"unknown doc_type {doc_type}")
+
+
+def _norm_reserves(data: dict) -> list[dict]:
+    reserves = []
+    for r in data.get("reserves") or []:
+        if not isinstance(r, dict):
+            continue
+        reserves.append({
+            "statement_date": str(r.get("statement_date") or ""),
+            "project": str(r.get("project") or ""),
+            "category": r.get("category") or "",
+            "metal": r.get("metal") or "silver",
+            "tonnage_t": r.get("tonnage_t"),
+            "grade_gpt": r.get("grade_gpt"),
+            "page": r.get("page"),
+            "confidence": r.get("confidence")
+            if r.get("confidence") in ("high", "medium", "low") else "low",
+        })
+    return reserves

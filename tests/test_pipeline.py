@@ -68,6 +68,39 @@ def test_sedar_kind_mapping_and_filenames():
     assert m.group(2) == "appendix-4d-and-2025-half-year-financial-report"
 
 
+def test_annual_mda_stores_q4_metrics_and_reserves(conn):
+    cid = db.upsert_company(conn, "CA", "SOMA", "Soma Gold", "CAD", "CADUSD",
+                            metal="gold")
+    doc_id = db.upsert_document(conn, cid, "/x/2026-05-01_mda_da.pdf", "shama",
+                                "annual_mda", "2026-05-01")
+    doc = conn.execute("SELECT * FROM documents WHERE id=?", (doc_id,)).fetchone()
+    data = _empty_metrics()
+    data["period"] = {"year": 2025, "quarter": 4}
+    data["reporting_currency"] = "CAD"
+    data["ore_milled_t"] = _metric(19895, unit="t")
+    data["reserves"] = [
+        {"statement_date": "2022-12-31", "project": "Cordero", "category": "indicated",
+         "metal": "gold", "tonnage_t": 355000, "grade_gpt": 6.9, "page": 5,
+         "confidence": "high"},
+        {"statement_date": "2022-12-31", "project": "Nechi", "category": "inferred",
+         "metal": "gold", "tonnage_t": 405000, "grade_gpt": 6.5, "page": 5,
+         "confidence": "high"},
+    ]
+    data["notes"] = None
+    pipeline._store(conn, doc, {"name": "Soma", "reporting_currency": "CAD",
+                                "metal": "gold"}, data)
+    # Q4 quarterly metric landed
+    row = conn.execute("SELECT value FROM quarterly_metrics "
+                       "WHERE period='2025-Q4' AND metric='ore_milled_t'").fetchone()
+    assert row["value"] == 19895
+    # AND the reserves rows landed with project + effective date
+    res = conn.execute("SELECT project, category, tonnage FROM reserves_statements "
+                       "ORDER BY category").fetchall()
+    assert [(r["project"], r["category"]) for r in res] == \
+        [("Cordero", "indicated"), ("Nechi", "inferred")]
+    assert res[0]["tonnage"] == 355000
+
+
 def test_annual_mda_period_is_prior_q4():
     # SEDAR annual MD&A filed Apr/May covers the prior calendar year's Q4
     assert pipeline.expected_period("2026-05-01", "annual_mda") == "2025-Q4"
