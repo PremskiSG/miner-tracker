@@ -97,8 +97,10 @@ def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
     payability range (reported revenue vs production x realized price, USD),
     trailing production-weighted AISC in USD/oz (reported AISC when the company
     states it, else the (opex + capex)/oz back-calc), trailing annual interest."""
-    metal = conn.execute("SELECT metal FROM companies WHERE id=?",
-                         (company_id,)).fetchone()["metal"]
+    crow = conn.execute("SELECT metal, reporting_currency FROM companies WHERE id=?",
+                        (company_id,)).fetchone()
+    metal = crow["metal"]
+    usd_reporter = (crow["reporting_currency"] or "").upper() == "USD"
     prod_m, price_m = f"{metal}_production_oz", f"{metal}_price_realized"
 
     def sub(metric: str) -> str:
@@ -122,6 +124,11 @@ def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
            WHERE m.company_id = ? AND m.metric = '{prod_m}'
              AND m.period LIKE '%-Q%'
            ORDER BY m.period""", (company_id,)).fetchall()
+    # USD reporters need no FX (rate 1.0); others require a quarterly rate
+    rows = [dict(r) for r in rows]
+    for r in rows:
+        if r["fx"] is None and usd_reporter:
+            r["fx"] = 1.0
     rows = [r for r in rows if r["fx"]]
     if not rows:
         return None

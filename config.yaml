@@ -31,3 +31,9 @@ companies:
     reporting_currency: CAD
     fx_pair: CADUSD
     metal: gold
+  - market: CA
+    ticker: THX
+    name: Thor Explorations
+    reporting_currency: USD      # Segilola (Nigeria) reports in USD -> no FX pair
+    fx_pair:
+    metal: gold

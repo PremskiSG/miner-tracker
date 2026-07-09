@@ -7,7 +7,8 @@ SYSTEM = (
     "document's reporting currency and state that currency per value. Amounts "
     "reported in thousands or millions (TSEK, kSEK, MSEK, A$M, $M, kt, koz, ...) "
     "must be converted to absolute units (e.g. 110.0 MSEK -> 110000000; "
-    "20.1 A$M -> 20100000; 111 kt -> 111000; 5.4 koz -> 5400). The document "
+    "20.1 A$M -> 20100000; 111 kt -> 111000; 5.4 koz -> 5400; a column headed "
+    "'$/000' or \"$'000\" is in thousands, so 74,317 -> 74317000). The document "
     "may be in English, Finnish, or Swedish — extract regardless of language."
 )
 
