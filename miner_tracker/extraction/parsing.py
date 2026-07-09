@@ -82,6 +82,7 @@ def normalize(data: dict, doc_type: str) -> dict:
                 continue
             reserves.append({
                 "statement_date": str(r.get("statement_date") or ""),
+                "project": str(r.get("project") or ""),
                 "category": r.get("category") or "",
                 "metal": r.get("metal") or "silver",
                 "tonnage_t": r.get("tonnage_t"),

@@ -1,0 +1,12 @@
+# AU_BCN: A=deepseek-v4-pro  vs  B=deepseek-v4-flash
+
+=== 2024-08-01_quarterly-activities-report_02835157.pdf (quarterly_activities)
+  deepseek-v4-pro      ok    16.4s  $0.0012  11 fields  (81+1351 tok)
+  deepseek-v4-flash    ok    10.6s  $0.0046  12 fields  (30801+1172 tok)
+    ! cash_cost_per_oz: deepseek-v4-pro=1937  deepseek-v4-flash=3471   <-- DISAGREE
+    ~ debt: deepseek-v4-pro=None  deepseek-v4-flash=9400000   <-- ONLY B
+
+=== TOTALS
+  deepseek-v4-pro      cost $0.001  time 16s  failures 0  fields extracted 11
+  deepseek-v4-flash    cost $0.005  time 11s  failures 0  fields extracted 12
+  10 agree, 1 disagree, 0 only-deepseek-v4-pro, 1 only-deepseek-v4-flash

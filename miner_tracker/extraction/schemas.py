@@ -114,17 +114,19 @@ ANNUAL_SCHEMA = {
                 "type": "object",
                 "properties": {
                     "statement_date": {"type": "string"},   # YYYY-MM-DD or YYYY-MM
+                    "project": {"type": "string"},           # pit/deposit; "" if company-total
                     "category": {"type": "string",
                                  "enum": ["measured", "indicated", "inferred",
-                                          "proven_probable", "measured_indicated"]},
+                                          "proven_probable", "measured_indicated",
+                                          "proved", "probable"]},
                     "metal": {"type": "string"},
                     "tonnage_t": {"type": ["number", "null"]},
                     "grade_gpt": {"type": ["number", "null"]},
                     "page": {"type": ["integer", "null"]},
                     "confidence": CONFIDENCE,
                 },
-                "required": ["statement_date", "category", "metal", "tonnage_t",
-                             "grade_gpt", "page", "confidence"],
+                "required": ["statement_date", "project", "category", "metal",
+                             "tonnage_t", "grade_gpt", "page", "confidence"],
                 "additionalProperties": False,
             },
         },

@@ -55,13 +55,14 @@ CREATE TABLE IF NOT EXISTS reserves_statements (
   id INTEGER PRIMARY KEY,
   company_id INTEGER NOT NULL REFERENCES companies(id),
   statement_date TEXT NOT NULL,
-  category TEXT NOT NULL,          -- measured | indicated | inferred | pp
+  category TEXT NOT NULL,          -- measured|indicated|inferred|pp|proved|probable
   metal TEXT NOT NULL DEFAULT 'silver',
+  project TEXT NOT NULL DEFAULT '',  -- pit/deposit name; '' = company-consolidated
   tonnage REAL,
   grade_gpt REAL,
   source_doc_id INTEGER REFERENCES documents(id),
   confidence TEXT,
-  UNIQUE(company_id, statement_date, category, metal)
+  UNIQUE(company_id, statement_date, category, metal, project)
 );
 
 CREATE TABLE IF NOT EXISTS fx_rates (
@@ -122,6 +123,34 @@ def _migrate(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE companies ADD COLUMN metal TEXT NOT NULL DEFAULT 'silver'")
         conn.commit()
 
+    rcols = {r["name"] for r in conn.execute("PRAGMA table_info(reserves_statements)")}
+    if "project" not in rcols:
+        # rebuild to add `project` and widen the UNIQUE key (SQLite can't ALTER a
+        # constraint). Existing category-level rows keep project='' unchanged.
+        conn.executescript("""
+            CREATE TABLE reserves_statements_new (
+              id INTEGER PRIMARY KEY,
+              company_id INTEGER NOT NULL REFERENCES companies(id),
+              statement_date TEXT NOT NULL,
+              category TEXT NOT NULL,
+              metal TEXT NOT NULL DEFAULT 'silver',
+              project TEXT NOT NULL DEFAULT '',
+              tonnage REAL, grade_gpt REAL,
+              source_doc_id INTEGER REFERENCES documents(id),
+              confidence TEXT,
+              UNIQUE(company_id, statement_date, category, metal, project)
+            );
+            INSERT INTO reserves_statements_new
+              (id, company_id, statement_date, category, metal, project,
+               tonnage, grade_gpt, source_doc_id, confidence)
+              SELECT id, company_id, statement_date, category, metal, '',
+                     tonnage, grade_gpt, source_doc_id, confidence
+              FROM reserves_statements;
+            DROP TABLE reserves_statements;
+            ALTER TABLE reserves_statements_new RENAME TO reserves_statements;
+        """)
+        conn.commit()
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -178,18 +207,25 @@ def upsert_metric(conn, company_id: int, period: str, metric: str, value: float 
     return True
 
 
+def clear_reserves_for_doc(conn, source_doc_id: int) -> None:
+    """Remove a document's reserve rows so re-extraction fully replaces them
+    (key fields like project/category can change between runs)."""
+    conn.execute("DELETE FROM reserves_statements WHERE source_doc_id=?",
+                 (source_doc_id,))
+
+
 def upsert_reserves(conn, company_id: int, statement_date: str, category: str,
                     tonnage: float | None, grade_gpt: float | None,
                     source_doc_id: int | None, confidence: str | None,
-                    metal: str = "silver") -> None:
+                    metal: str = "silver", project: str = "") -> None:
     conn.execute(
         """INSERT INTO reserves_statements(company_id, statement_date, category, metal,
-             tonnage, grade_gpt, source_doc_id, confidence)
-           VALUES(?,?,?,?,?,?,?,?)
-           ON CONFLICT(company_id, statement_date, category, metal) DO UPDATE SET
+             project, tonnage, grade_gpt, source_doc_id, confidence)
+           VALUES(?,?,?,?,?,?,?,?,?)
+           ON CONFLICT(company_id, statement_date, category, metal, project) DO UPDATE SET
              tonnage=excluded.tonnage, grade_gpt=excluded.grade_gpt,
              source_doc_id=excluded.source_doc_id, confidence=excluded.confidence""",
-        (company_id, statement_date, category, metal, tonnage, grade_gpt,
+        (company_id, statement_date, category, metal, project, tonnage, grade_gpt,
          source_doc_id, confidence))
 
 

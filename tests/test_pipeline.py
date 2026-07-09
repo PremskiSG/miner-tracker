@@ -166,6 +166,40 @@ def test_store_fs_release_separates_q4_and_fy(conn):
     assert rows == {"2025-Q4": 186_000_000, "2025-FY": 500_000_000}
 
 
+def test_store_per_project_reserves_and_aggregate(conn):
+    from miner_tracker import queries
+    cid = db.upsert_company(conn, "AU", "BCN", "Beacon", "AUD", "AUDUSD", metal="gold")
+    doc_id = db.upsert_document(conn, cid, "/x/2025-09-05_ar_ab.pdf", "sha6x",
+                                "annual_report", "2025-09-05")
+    doc = conn.execute("SELECT * FROM documents WHERE id=?", (doc_id,)).fetchone()
+    data = {"fiscal_year": 2025, "notes": None, "reserves": [
+        {"statement_date": "2025-06-30", "project": "Iguana Pit", "category": "proved",
+         "metal": "gold", "tonnage_t": 181000, "grade_gpt": 1.6, "page": 66, "confidence": "high"},
+        {"statement_date": "2025-06-30", "project": "Iguana Pit", "category": "probable",
+         "metal": "gold", "tonnage_t": 3549000, "grade_gpt": 1.1, "page": 66, "confidence": "high"},
+        {"statement_date": "2025-06-30", "project": "Geko Pit", "category": "proved",
+         "metal": "gold", "tonnage_t": 980000, "grade_gpt": 1.1, "page": 66, "confidence": "high"},
+    ]}
+    pipeline._store(conn, doc, {"name": "Beacon", "reporting_currency": "AUD",
+                                "metal": "gold"}, data)
+    rows = conn.execute("SELECT project, category FROM reserves_statements "
+                        "ORDER BY project, category").fetchall()
+    assert [(r["project"], r["category"]) for r in rows] == [
+        ("Geko Pit", "proved"), ("Iguana Pit", "probable"), ("Iguana Pit", "proved")]
+
+    agg = queries.reserves_aggregate(queries.reserves_frame(conn, cid))
+    proved = agg[agg["category"] == "proved"].iloc[0]
+    assert proved["tonnage"] == 181000 + 980000               # summed across pits
+    assert proved["grade_gpt"] == pytest.approx(               # tonnage-weighted
+        (181000 * 1.6 + 980000 * 1.1) / (181000 + 980000))
+
+    # re-extracting the same doc with different projects replaces, not appends
+    data["reserves"] = [data["reserves"][0]]
+    pipeline._store(conn, doc, {"name": "Beacon", "reporting_currency": "AUD",
+                                "metal": "gold"}, data)
+    assert conn.execute("SELECT COUNT(*) n FROM reserves_statements").fetchone()["n"] == 1
+
+
 def test_store_annual_reserves(conn):
     cid = db.upsert_company(conn, "NORDIC", "SOSI1", "Sotkamo Silver", "SEK", "SEKUSD")
     doc_id = db.upsert_document(conn, cid, "/x/2026-03-31_ar_ab.pdf", "sha3x",

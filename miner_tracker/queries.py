@@ -41,11 +41,43 @@ def confidence_wide(conn, company_id: int) -> pd.DataFrame:
 
 
 def reserves_frame(conn, company_id: int) -> pd.DataFrame:
-    return pd.read_sql_query(
-        """SELECT statement_date, category, metal, tonnage, grade_gpt, confidence
+    df = pd.read_sql_query(
+        """SELECT statement_date, project, category, metal, tonnage, grade_gpt,
+                  confidence
            FROM reserves_statements WHERE company_id = ?
-           ORDER BY statement_date, category""",
+           ORDER BY statement_date, project, category""",
         conn, params=(company_id,))
+    if not df.empty:
+        df["project"] = df["project"].replace("", "(consolidated)")
+    return df
+
+
+CONSOLIDATED = "(consolidated)"
+
+
+def reserves_aggregate(df: pd.DataFrame) -> pd.DataFrame:
+    """Sum tonnage and tonnage-weight grade across projects, per
+    (statement_date, category). Rows with only a grade (no tonnage) fall back to
+    a simple mean so a category isn't dropped. Where a report prints BOTH a
+    company sub-total (project=(consolidated)) and per-pit rows, the sub-total is
+    dropped to avoid double counting."""
+    if df.empty:
+        return df
+    out = []
+    for (date, cat), g in df.groupby(["statement_date", "category"]):
+        has_pits = (g["project"] != CONSOLIDATED).any()
+        if has_pits:
+            g = g[g["project"] != CONSOLIDATED]
+        tons = g["tonnage"].dropna()
+        total_t = tons.sum() if not tons.empty else None
+        gw = g.dropna(subset=["tonnage", "grade_gpt"])
+        if not gw.empty and gw["tonnage"].sum():
+            grade = (gw["tonnage"] * gw["grade_gpt"]).sum() / gw["tonnage"].sum()
+        else:
+            grade = g["grade_gpt"].dropna().mean() if g["grade_gpt"].notna().any() else None
+        out.append({"statement_date": date, "category": cat,
+                    "tonnage": total_t, "grade_gpt": grade})
+    return pd.DataFrame(out).sort_values(["statement_date", "category"])
 
 
 def review_rows(conn, company_id: int) -> pd.DataFrame:
