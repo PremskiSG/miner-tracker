@@ -73,7 +73,12 @@ def compute(g: GlobalInputs, years: list[YearInputs]) -> ModelResult:
         cost = y.production_oz * y.aisc * y.fx * (1 + g.mining_tax)
         ni = (revenue - cost - y.depreciation) * (1 - y.tax_rate) - y.interest - y.capex + y.depreciation
         if i >= g.discount_start_index:
-            dcf = ni / (1 + g.discount_rate) ** (i - 1)
+            # first counted year is discounted by 1 period; the exponent is
+            # relative to discount_start_index so it works whether the deck
+            # starts "now" (index 0) or skips leading historical years.
+            # (i - discount_start_index + 1) == (i - 1) when start index is 2,
+            # so the Sotkamo/Excel-validated NPV is unchanged.
+            dcf = ni / (1 + g.discount_rate) ** (i - g.discount_start_index + 1)
             acc += dcf
         else:
             dcf = 0.0

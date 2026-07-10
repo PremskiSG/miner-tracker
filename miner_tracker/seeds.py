@@ -34,7 +34,11 @@ def _sotkamo_scenario(price: float, payability: float,
 def blank_scenario(start_year: int = 2026, n_years: int = 15,
                    price: float = 0.0, payability: float = 1.0,
                    track_filing_price: bool = False) -> dict:
-    g = GlobalInputs(payability=payability, mining_tax=0.0, discount_rate=0.10)
+    # forecast starts at the current year, so discount from year 1 (index 0) —
+    # every forecast year counts. (Sotkamo keeps its Excel start-index of 2,
+    # which skips its two historical lead years.)
+    g = GlobalInputs(payability=payability, mining_tax=0.0, discount_rate=0.10,
+                     discount_start_index=0)
     years = [YearInputs(year=start_year + i, price=price) for i in range(n_years)]
     out = assumptions_from_inputs(g, years)
     out["ui"] = {"track_filing_price": track_filing_price}
