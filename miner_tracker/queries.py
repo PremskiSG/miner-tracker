@@ -118,11 +118,13 @@ def mineable_ounces(conn, company_id: int, resource_factor: float = 0.60) -> dic
     agg = reserves_aggregate(df[df["statement_date"] == latest])
     reserve_oz = _contained_oz(agg, _RESERVE_CATS)
     resource_oz = _contained_oz(agg, _RESOURCE_MI)
+    inferred_oz = _contained_oz(agg, ("inferred",))
     mineable = reserve_oz + resource_factor * resource_oz
     return {
         "mineable_oz": mineable,
         "reserve_oz": reserve_oz,
         "resource_mi_oz": resource_oz,
+        "inferred_oz": inferred_oz,
         "resource_factor": resource_factor,
         "statement_date": latest,
         "metal": metal,

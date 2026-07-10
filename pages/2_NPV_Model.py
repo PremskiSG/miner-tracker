@@ -172,13 +172,18 @@ if mo is None:
     st.info(f"No reserves/resources on file for {company['name']} — add them on the "
             "Reserves page (from an annual report) to estimate mine life.")
 else:
-    factor = st.slider("Resource conversion factor (share of Measured+Indicated "
-                       "resources counted as mineable)", 0.0, 1.0, 0.60, 0.05,
-                       help="Reserves (Proved+Probable) always count 100%. Inferred "
-                            "resources are excluded.")
+    sc = st.columns(2)
+    factor = sc[0].slider("M&I resource conversion factor", 0.0, 1.0, 0.60, 0.05,
+                          help="Share of Measured+Indicated resources counted as "
+                               "mineable. Reserves (Proved+Probable) always count 100%.")
+    inf_factor = sc[1].slider("Inferred conversion factor", 0.0, 1.0, 0.0, 0.05,
+                              help="Share of Inferred resources counted as mineable. "
+                                   "Default 0 (excluded). Raise it for resource-stage "
+                                   "producers whose mine plan draws on Inferred material.")
     reserve_oz = mo["reserve_oz"]
     resource_oz = mo["resource_mi_oz"]
-    mineable = reserve_oz + factor * resource_oz
+    inferred_oz = mo.get("inferred_oz", 0.0)
+    mineable = reserve_oz + factor * resource_oz + inf_factor * inferred_oz
     stmt_year = int(mo["statement_date"][:4])
     ml = mine_life(mineable, years, from_year=stmt_year)
     forecast_oz = sum(y.production_oz or 0 for y in years if y.year >= stmt_year)
@@ -191,13 +196,16 @@ else:
     else:
         life_str = f"≥ {ml.years:.0f} yrs"
         depl_str = f"{ml.remaining_oz/1e3:,.0f} koz left after {years[-1].year}"
-    mm = st.columns(4)
+    mm = st.columns(5)
     mm[0].metric(f"Mine life ({mo['metal']})", life_str, depl_str, delta_color="off")
     mm[1].metric("Mineable oz", f"{mineable/1e3:,.0f} koz")
     mm[2].metric("Reserves (P&P)", f"{reserve_oz/1e3:,.0f} koz")
     mm[3].metric(f"{factor:.0%} of M&I resource",
                  f"{factor*resource_oz/1e3:,.0f} koz",
                  f"of {resource_oz/1e3:,.0f} koz M&I", delta_color="off")
+    mm[4].metric(f"{inf_factor:.0%} of Inferred",
+                 f"{inf_factor*inferred_oz/1e3:,.0f} koz",
+                 f"of {inferred_oz/1e3:,.0f} koz Inf", delta_color="off")
     caption = (f"Basis: {mo['basis']} as at {mo['statement_date']} · reserves + "
                f"{factor:.0%} of M&I resources, walked against the production "
                f"forecast from {stmt_year}. ")
