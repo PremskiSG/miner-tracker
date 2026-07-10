@@ -10,7 +10,7 @@ import streamlit as st
 
 from miner_tracker import db, queries, ui
 from miner_tracker.npv import (GlobalInputs, YearInputs, assumptions_from_inputs,
-                               carry_forward_aisc, compute, mine_life)
+                               carry_forward_aisc, compute, mine_life, plan_mine_life)
 from miner_tracker.seeds import blank_scenario, seed_company_scenarios
 
 st.set_page_config(page_title="NPV Model", layout="wide")
@@ -165,59 +165,62 @@ m[2].metric("EV / NPV", f"{result.ev_npv:.2f}" if result.npv else "—")
 m[3].metric("Upside vs MCap", f"{result.upside:+.1%}" if g.market_cap else "—")
 m[4].metric("P/E (first year)", f"{result.years[0].pe:.1f}" if result.years else "—")
 
-# ── Mine life: reserves outstanding vs the production forecast above ──────────
+# ── Mine life: driven by the production PLAN above; reserves are the coverage check ──
 st.subheader("Mine life")
-mo = queries.mineable_ounces(conn, company["id"])  # reserve_oz + resource split
-if mo is None:
-    st.info(f"No reserves/resources on file for {company['name']} — add them on the "
-            "Reserves page (from an annual report) to estimate mine life.")
-else:
-    sc = st.columns(2)
-    factor = sc[0].slider("M&I resource conversion factor", 0.0, 1.0, 0.60, 0.05,
-                          help="Share of Measured+Indicated resources counted as "
-                               "mineable. Reserves (Proved+Probable) always count 100%.")
-    inf_factor = sc[1].slider("Inferred conversion factor", 0.0, 1.0, 0.0, 0.05,
-                              help="Share of Inferred resources counted as mineable. "
-                                   "Default 0 (excluded). Raise it for resource-stage "
-                                   "producers whose mine plan draws on Inferred material.")
-    reserve_oz = mo["reserve_oz"]
-    resource_oz = mo["resource_mi_oz"]
-    inferred_oz = mo.get("inferred_oz", 0.0)
-    mineable = reserve_oz + factor * resource_oz + inf_factor * inferred_oz
-    stmt_year = int(mo["statement_date"][:4])
-    ml = mine_life(mineable, years, from_year=stmt_year)
-    forecast_oz = sum(y.production_oz or 0 for y in years if y.year >= stmt_year)
+pl = plan_mine_life(years)          # the company's stated plan (from the grid)
+mo = queries.mineable_ounces(conn, company["id"])   # classified reserves/resources
 
-    if forecast_oz <= 0:
-        life_str, depl_str = "— yrs", "enter a production forecast above"
-    elif ml.depletion_year:
-        life_str = f"{ml.years:.1f} yrs"
-        depl_str = f"depleted ~{ml.depletion_year}"
+if pl.planned_oz <= 0:
+    st.info("Enter production per year in the grid above — mine life is driven by the "
+            "production plan.")
+else:
+    # optional reserve/resource coverage check
+    if mo:
+        sc = st.columns(2)
+        factor = sc[0].slider("M&I resource conversion factor", 0.0, 1.0, 0.60, 0.05,
+                              help="Share of Measured+Indicated resources counted as "
+                                   "mineable for the coverage check. P&P reserves = 100%.")
+        inf_factor = sc[1].slider("Inferred conversion factor", 0.0, 1.0, 0.0, 0.05,
+                                  help="Share of Inferred resources counted as mineable. "
+                                       "Default 0. Raise it for resource-stage producers "
+                                       "whose mine plan draws on Inferred material.")
+        reserve_oz = mo["reserve_oz"]
+        resource_oz = mo["resource_mi_oz"]
+        inferred_oz = mo.get("inferred_oz", 0.0)
+        mineable = reserve_oz + factor * resource_oz + inf_factor * inferred_oz
+        coverage = mineable / pl.planned_oz if pl.planned_oz else None
     else:
-        life_str = f"≥ {ml.years:.0f} yrs"
-        depl_str = f"{ml.remaining_oz/1e3:,.0f} koz left after {years[-1].year}"
-    mm = st.columns(5)
-    mm[0].metric(f"Mine life ({mo['metal']})", life_str, depl_str, delta_color="off")
-    mm[1].metric("Mineable oz", f"{mineable/1e3:,.0f} koz")
-    mm[2].metric("Reserves (P&P)", f"{reserve_oz/1e3:,.0f} koz")
-    mm[3].metric(f"{factor:.0%} of M&I resource",
-                 f"{factor*resource_oz/1e3:,.0f} koz",
-                 f"of {resource_oz/1e3:,.0f} koz M&I", delta_color="off")
-    mm[4].metric(f"{inf_factor:.0%} of Inferred",
-                 f"{inf_factor*inferred_oz/1e3:,.0f} koz",
-                 f"of {inferred_oz/1e3:,.0f} koz Inf", delta_color="off")
-    caption = (f"Basis: {mo['basis']} as at {mo['statement_date']} · reserves + "
-               f"{factor:.0%} of M&I resources, walked against the production "
-               f"forecast from {stmt_year}. ")
-    if forecast_oz <= 0:
-        caption += "Set production per year in the grid above to compute mine life."
-    elif ml.depletion_year:
-        caption += f"At the planned rate, reserves support production to ~{ml.depletion_year}."
+        mineable = coverage = None
+
+    mm = st.columns(4)
+    mm[0].metric(f"Mine life — plan ({metal})", f"{pl.years:.0f} yrs",
+                 f"{pl.start_year}–{pl.end_year}", delta_color="off")
+    mm[1].metric("Planned production", f"{pl.planned_oz/1e3:,.0f} koz")
+    if mineable is not None:
+        mm[2].metric("Mineable reserves+resource", f"{mineable/1e3:,.0f} koz")
+        cov_note = ("plan fully reserve-backed" if coverage >= 1 else
+                    "plan exceeds classified — needs conversion")
+        mm[3].metric("Reserve coverage of plan", f"{coverage:.0%}", cov_note,
+                     delta_color="off")
     else:
-        caption += "Reserves outlast the forecast horizon."
-    if reserve_oz and resource_oz:
-        caption += (" Note: if the company reports M&I *inclusive* of reserves, this "
-                    "additive basis overstates — lower the factor to compensate.")
+        mm[2].metric("Classified reserves", "none on file")
+
+    caption = (f"Mine life is the production plan's span ({pl.start_year}–{pl.end_year}, "
+               f"{pl.planned_oz/1e3:,.0f} koz {metal}) — set in the grid above. ")
+    if mineable is not None:
+        stmt_year = int(mo["statement_date"][:4])
+        ml = mine_life(mineable, years)
+        caption += (f"Classified reserves/resources ({mo['basis']}, {mo['statement_date']}) "
+                    f"cover {coverage:.0%} of the plan")
+        if coverage < 1:
+            caption += (f" — at the planned rate they deplete ~{ml.depletion_year}, so the "
+                        "rest of the plan relies on converting resources / exploration. "
+                        "Raise the conversion factors to credit that.")
+        else:
+            caption += " — reserves back the full plan."
+        if reserve_oz and resource_oz:
+            caption += (" (If M&I is reported inclusive of reserves, lower the factor to "
+                        "avoid double-counting.)")
     st.caption(caption)
 
 fig = go.Figure()

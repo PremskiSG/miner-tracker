@@ -108,6 +108,27 @@ def carry_forward_aisc(years: list[YearInputs]) -> None:
             y.aisc = last
 
 
+@dataclass
+class PlanLife:
+    years: float              # duration of the production plan (last-first+1)
+    start_year: int | None
+    end_year: int | None      # last year the plan produces
+    planned_oz: float         # total ounces the plan produces
+
+
+def plan_mine_life(years: list[YearInputs], from_year: int | None = None) -> PlanLife:
+    """Mine life implied by the production PLAN itself — the span of years the
+    forecast actually produces, and the total ounces it plans to mine. This is
+    the company's stated plan, independent of classified reserves."""
+    prod = [(y.year, y.production_oz or 0.0)
+            for y in sorted(years, key=lambda y: y.year)
+            if (from_year is None or y.year >= from_year) and (y.production_oz or 0) > 0]
+    if not prod:
+        return PlanLife(0.0, None, None, 0.0)
+    start, end = prod[0][0], prod[-1][0]
+    return PlanLife(float(end - start + 1), start, end, sum(p for _, p in prod))
+
+
 def mine_life(mineable_oz: float, years: list[YearInputs],
               from_year: int | None = None) -> MineLife:
     """Walk the production forecast, depleting `mineable_oz` year by year.

@@ -104,3 +104,23 @@ def test_mine_life_respects_from_year():
              YearInputs(2026, production_oz=100_000)]
     ml = mine_life(150_000, years, from_year=2025)
     assert ml.depletion_year == 2026 and ml.years == 1.5
+
+
+def test_plan_mine_life_span_and_total():
+    from miner_tracker.npv import YearInputs, plan_mine_life
+    years = [YearInputs(2026, production_oz=30_000),
+             YearInputs(2027, production_oz=40_000),
+             YearInputs(2028, production_oz=64_000),
+             YearInputs(2029, production_oz=0),          # gap year still within span
+             YearInputs(2030, production_oz=53_000),
+             YearInputs(2031, production_oz=0)]           # trailing zeros excluded
+    pl = plan_mine_life(years)
+    assert pl.start_year == 2026 and pl.end_year == 2030
+    assert pl.years == 5.0                                # 2030 - 2026 + 1
+    assert pl.planned_oz == 187_000
+
+
+def test_plan_mine_life_empty():
+    from miner_tracker.npv import YearInputs, plan_mine_life
+    pl = plan_mine_life([YearInputs(2026, production_oz=0)])
+    assert pl.planned_oz == 0 and pl.years == 0.0 and pl.start_year is None
