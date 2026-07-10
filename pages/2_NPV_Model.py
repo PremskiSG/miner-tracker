@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from miner_tracker import db, queries, ui
+from miner_tracker import db, market, queries, ui
 from miner_tracker.npv import (GlobalInputs, YearInputs, assumptions_from_inputs,
                                carry_forward_aisc, compute, mine_life, plan_mine_life)
 from miner_tracker.seeds import blank_scenario, seed_company_scenarios
@@ -98,15 +98,25 @@ g_dict["mining_tax"] = c[2].number_input(
 g_dict["discount_rate"] = c[3].number_input(
     "Discount rate", value=float(g_dict.get("discount_rate", 0.10)), step=0.01,
     format="%.2f")
-mcap_m = c[4].number_input("Market cap (mUSD)",
-                           value=float(g_dict.get("market_cap", 0.0)) / 1e6, step=1.0)
-net_debt_m = c[5].number_input("Net debt (mUSD)",
-                               value=float(g_dict.get("net_debt", 0.0)) / 1e6, step=1.0)
-shares = c[6].number_input("Shares out (m)",
-                           value=float(g_dict.get("shares_outstanding") or 0.0), step=1.0)
+# Balance-sheet FACTS derive from live market data + filings; the scenario's own
+# value (if the user set one) wins, otherwise these fill in — still overridable.
+mkt = market.latest(conn, company["market"], company["ticker"])
+nd = queries.net_debt_usd(conn, company["id"])
+mcap_default = g_dict.get("market_cap") or (mkt["market_cap_usd"] if mkt else 0.0)
+nd_default = g_dict.get("net_debt") or (nd["net_debt_usd"] if nd else 0.0)
+sh_default = g_dict.get("shares_outstanding") or (mkt["shares"] if mkt else 0.0)
+
+mcap_m = c[4].number_input("Market cap (mUSD)", value=float(mcap_default) / 1e6, step=1.0)
+if mkt and not g_dict.get("market_cap"):
+    c[4].caption(f"yfinance {mkt['as_of']}: {mkt['shares']/1e6:,.0f}M sh × "
+                 f"{mkt['price_local']:.2f} {mkt['currency']}")
+net_debt_m = c[5].number_input("Net debt (mUSD)", value=float(nd_default) / 1e6, step=1.0)
+if nd and not g_dict.get("net_debt"):
+    c[5].caption(f"filings {nd['period']}: debt − cash ({nd['currency']}→USD)")
+shares = c[6].number_input("Shares out (m)", value=float(sh_default) / 1e6, step=1.0)
 g_dict["market_cap"] = mcap_m * 1e6
 g_dict["net_debt"] = net_debt_m * 1e6
-g_dict["shares_outstanding"] = shares or None
+g_dict["shares_outstanding"] = (shares * 1e6) or None
 
 st.subheader("Per-year assumptions")
 
@@ -121,8 +131,7 @@ def _apply_to_all_years(field: str, value: float) -> None:
     st.rerun()
 
 
-if stats and (stats["aisc_usd"] or stats["interest_usd"]):
-    fc = st.columns([3, 1.2, 1.4])
+if stats and (stats["aisc_usd"] or stats["interest_usd"] or stats.get("depreciation_usd")):
     parts = []
     if stats["aisc_usd"]:
         how = ("as reported by the company" if stats.get("aisc_source") == "reported"
@@ -130,11 +139,16 @@ if stats and (stats["aisc_usd"] or stats["interest_usd"]):
         parts.append(f"AISC ${stats['aisc_usd']:,.2f}/oz ({how})")
     if stats["interest_usd"]:
         parts.append(f"interest ${stats['interest_usd']/1e6:.2f}M/yr")
-    fc[0].caption("From filings, trailing 4 quarters: " + " · ".join(parts))
-    if stats["aisc_usd"] and fc[1].button("Apply AISC to all years"):
+    if stats.get("depreciation_usd"):
+        parts.append(f"depreciation ${stats['depreciation_usd']/1e6:.2f}M/yr")
+    st.caption("From filings, trailing 4 quarters: " + " · ".join(parts))
+    fc = st.columns(3)
+    if stats["aisc_usd"] and fc[0].button("Apply AISC to all years"):
         _apply_to_all_years("aisc", stats["aisc_usd"])
-    if stats["interest_usd"] and fc[2].button("Apply interest to all years"):
+    if stats["interest_usd"] and fc[1].button("Apply interest to all years"):
         _apply_to_all_years("interest", stats["interest_usd"])
+    if stats.get("depreciation_usd") and fc[2].button("Apply depreciation to all years"):
+        _apply_to_all_years("depreciation", stats["depreciation_usd"])
 
 ROW_FIELDS = ["production_oz", "aisc", "fx", "capex", "depreciation",
               "interest", "tax_rate"]

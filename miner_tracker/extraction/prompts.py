@@ -138,6 +138,25 @@ def fy_prompt(company: str, published_date: str, metal: str = "gold") -> str:
     )
 
 
+def balance_sheet_prompt(company: str, published_date: str,
+                         metal: str = "gold") -> str:
+    return (
+        f"This is a financial-statements filing from {company}, published "
+        f"{published_date}. Extract ONLY the balance-sheet items for the MOST "
+        "RECENT reporting date (the current period, not the prior-year "
+        "comparative), and return that reporting date (period_end_date, "
+        "YYYY-MM-DD). Items: 'cash' = cash and cash equivalents (exclude "
+        "restricted cash and term deposits/short-term investments); 'total_debt' "
+        "= TOTAL interest-bearing debt = the sum of current AND non-current "
+        "borrowings, loans payable, notes, bonds, and lease liabilities (exclude "
+        "trade payables, provisions and deferred items); 'shares_outstanding' = "
+        "the number of common shares issued and outstanding at period end (a "
+        "share count, not weighted-average, not a dollar amount). Convert "
+        "thousands/millions to absolute units and state the reporting currency "
+        "on each monetary value. Give the page and confidence for each."
+    )
+
+
 def annual_prompt(company: str, published_date: str, metal: str = "silver") -> str:
     return (
         f"This is an annual report from {company}, a {metal} mining company, "
@@ -168,6 +187,7 @@ def annual_prompt(company: str, published_date: str, metal: str = "silver") -> s
 PROMPTS = {
     "interim_report": interim_prompt,
     "quarterly_activities": quarterly_activities_prompt,
+    "balance_sheet": balance_sheet_prompt,
     "annual_mda": annual_mda_prompt,
     "fs_release": fs_release_prompt,
     "half_year_report": half_year_prompt,

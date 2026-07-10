@@ -10,7 +10,6 @@ _SOSI_PRODUCTION = [1_200_000, 850_000, 1_000_000, 1_100_000, 1_150_000,
 _SOSI_AISC = [35, 50, 47.7, 47.7, 46.64, 46.64, 46.64, 46.64] + [49.82] * 9
 _SOSI_INTEREST = [3_780_000, 3_500_000, 2_000_000] + [0] * 14
 _SOSI_TAX = [0.2, 0.2, 0.0] + [0.2] * 14
-_SOSI_DEP = 7_461_449.18
 
 # User's scenario price decks (USD/oz). Gold constants are for phase-2 companies.
 SILVER_BEAR, SILVER_BULL = 35.0, 80.0
@@ -19,11 +18,12 @@ GOLD_BEAR, GOLD_BULL = 3_000.0, 6_000.0
 
 def _sotkamo_scenario(price: float, payability: float,
                       track_filing_price: bool = False) -> dict:
-    g = GlobalInputs(payability=payability, mining_tax=0.025, discount_rate=0.10,
-                     market_cap=154_200_000.0, net_debt=16_684_629.41,
-                     shares_outstanding=350.0)
+    # Balance-sheet facts (market_cap, net_debt, shares, depreciation) are NOT
+    # hardcoded from the Excel — the NPV page derives them from live market data
+    # (yfinance) + filings. Only the forward operating deck is seeded here.
+    g = GlobalInputs(payability=payability, mining_tax=0.025, discount_rate=0.10)
     years = [YearInputs(year=2024 + i, production_oz=_SOSI_PRODUCTION[i],
-                        aisc=_SOSI_AISC[i], price=price, depreciation=_SOSI_DEP,
+                        aisc=_SOSI_AISC[i], price=price,
                         interest=_SOSI_INTEREST[i], tax_rate=_SOSI_TAX[i])
              for i in range(17)]
     out = assumptions_from_inputs(g, years)

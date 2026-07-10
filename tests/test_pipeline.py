@@ -52,9 +52,9 @@ def test_sedar_kind_mapping_and_filenames():
     cases = {
         "2026-05-28_interim-md-a_da-en-2eed.pdf": "interim_report",
         "2025-04-30_management-s-discussion-analysis-md-a_glish-0801.pdf": "annual_mda",
-        # the paired financial-statements PDFs are unmapped -> skipped
-        "2026-05-28_interim-financial-statements_rt-en-917c.pdf": None,
-        "2026-04-30_financial-statements_ts-en-712a.pdf": None,
+        # the paired financial-statements PDFs carry the balance sheet
+        "2026-05-28_interim-financial-statements_rt-en-917c.pdf": "balance_sheet",
+        "2026-04-30_financial-statements_ts-en-712a.pdf": "balance_sheet",
     }
     for fname, expected in cases.items():
         m = pipeline._FILENAME_RE.match(fname)
@@ -309,3 +309,55 @@ def test_store_annual_reserves(conn):
     assert [r["category"] for r in rows] == ["measured", "pp"]
     assert rows[1]["grade_gpt"] == 84.7
     assert all(r["metal"] == "silver" for r in rows)
+
+
+def test_quarter_label_for_date():
+    assert pipeline.quarter_label_for_date("2026-03-31") == "2026-Q1"
+    assert pipeline.quarter_label_for_date("2025-12-31") == "2025-Q4"
+    assert pipeline.quarter_label_for_date("2025-06-30") == "2025-Q2"
+    assert pipeline.quarter_label_for_date("garbage") is None
+
+
+def test_store_balance_sheet(conn):
+    cid = db.upsert_company(conn, "CA", "SOMA", "Soma Gold", "CAD", "CADUSD",
+                            metal="gold")
+    doc_id = db.upsert_document(conn, cid, "/x/2026-05-28_interim-financial-statements_z.pdf",
+                                "shabs", "balance_sheet", "2026-05-28")
+    doc = conn.execute("SELECT * FROM documents WHERE id=?", (doc_id,)).fetchone()
+    data = {
+        "period_end_date": "2026-03-31",
+        "cash": _metric(3_783_295, "CAD"),
+        "total_debt": _metric(-18_800_000, "CAD"),   # negatives -> magnitude
+        "shares_outstanding": _metric(118_453_241, unit="shares"),
+        "notes": None,
+    }
+    pipeline._store(conn, doc, {"name": "Soma", "reporting_currency": "CAD",
+                                "metal": "gold"}, data)
+    rows = {r["metric"]: r for r in conn.execute(
+        "SELECT metric, value, currency FROM quarterly_metrics WHERE period='2026-Q1'")}
+    assert rows["cash"]["value"] == 3_783_295 and rows["cash"]["currency"] == "CAD"
+    assert rows["debt"]["value"] == 18_800_000        # abs()
+    assert rows["shares_outstanding"]["value"] == 118_453_241
+    assert rows["shares_outstanding"]["currency"] is None
+
+
+def test_net_debt_usd_same_period_and_fx(conn):
+    from miner_tracker import queries
+    cid = db.upsert_company(conn, "CA", "SOMA", "Soma", "CAD", "CADUSD", metal="gold")
+    db.set_fx(conn, "CADUSD", "2026-Q1", 0.73)
+    # older quarter with debt only should NOT be chosen (needs both)
+    db.upsert_metric(conn, cid, "2024-Q4", "debt", 35_000_000, "CAD", None, None, 1, "high")
+    db.upsert_metric(conn, cid, "2026-Q1", "debt", 18_800_000, "CAD", None, None, 1, "high")
+    db.upsert_metric(conn, cid, "2026-Q1", "cash", 3_800_000, "CAD", None, None, 1, "high")
+    nd = queries.net_debt_usd(conn, cid)
+    assert nd["period"] == "2026-Q1"                  # latest with BOTH
+    assert nd["net_debt_usd"] == pytest.approx((18_800_000 - 3_800_000) * 0.73)
+
+
+def test_net_debt_usd_usd_reporter_no_fx(conn):
+    from miner_tracker import queries
+    cid = db.upsert_company(conn, "CA", "THX", "Thor", "USD", None, metal="gold")
+    db.upsert_metric(conn, cid, "2026-Q1", "debt", 0, "USD", None, None, 1, "high")
+    db.upsert_metric(conn, cid, "2026-Q1", "cash", 159_000_000, "USD", None, None, 1, "high")
+    nd = queries.net_debt_usd(conn, cid)
+    assert nd["net_debt_usd"] == -159_000_000 and nd["fx"] == 1.0

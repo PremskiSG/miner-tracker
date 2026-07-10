@@ -19,27 +19,32 @@ companies:
     reporting_currency: SEK
     fx_pair: SEKUSD
     metal: silver
+    market_symbol: SOSI1.HE
   - market: AU
     ticker: BCN
     name: Beacon Minerals
     reporting_currency: AUD
     fx_pair: AUDUSD
     metal: gold
+    market_symbol: BCN.AX
   - market: CA
     ticker: SOMA
     name: Soma Gold
     reporting_currency: CAD
     fx_pair: CADUSD
     metal: gold
+    market_symbol: SOMA.V
   - market: CA
     ticker: THX
     name: Thor Explorations
     reporting_currency: USD      # Segilola (Nigeria) reports in USD -> no FX pair
     fx_pair:
     metal: gold
+    market_symbol: THX.V
   - market: UK
     ticker: ALTN
     name: AltynGold
     reporting_currency: USD      # LSE/AIM; Sekisovskoye (Kazakhstan) reports in USD
     fx_pair:
     metal: gold
+    market_symbol: ALTN.L

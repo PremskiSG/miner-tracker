@@ -146,6 +146,38 @@ def review_rows(conn, company_id: int) -> pd.DataFrame:
         conn, params=(company_id,))
 
 
+def net_debt_usd(conn, company_id: int) -> dict | None:
+    """Net debt (total debt - cash) in USD from the most recent quarter that has
+    BOTH figures (so they're same-period). Uses the quarterly FX rate; USD
+    reporters need none. Returns value + period + FX, or None."""
+    crow = conn.execute("SELECT reporting_currency, fx_pair FROM companies WHERE id=?",
+                        (company_id,)).fetchone()
+    usd_reporter = (crow["reporting_currency"] or "").upper() == "USD"
+    row = conn.execute(
+        """SELECT d.period,
+              (SELECT value FROM quarterly_metrics WHERE company_id=d.company_id
+                 AND period=d.period AND metric='debt') AS debt,
+              (SELECT value FROM quarterly_metrics WHERE company_id=d.company_id
+                 AND period=d.period AND metric='cash') AS cash,
+              f.rate AS fx
+           FROM quarterly_metrics d
+           JOIN companies c ON c.id = d.company_id
+           LEFT JOIN fx_rates f ON f.pair = c.fx_pair AND f.period = d.period
+           WHERE d.company_id = ? AND d.metric = 'debt' AND d.period LIKE '%-Q%'
+             AND (SELECT value FROM quarterly_metrics WHERE company_id=d.company_id
+                    AND period=d.period AND metric='cash') IS NOT NULL
+           ORDER BY d.period DESC LIMIT 1""", (company_id,)).fetchone()
+    if row is None:
+        return None
+    fx = 1.0 if usd_reporter else row["fx"]
+    if fx is None:
+        return None
+    net_local = (row["debt"] or 0) - (row["cash"] or 0)
+    return {"net_debt_usd": net_local * fx, "period": row["period"],
+            "debt": row["debt"], "cash": row["cash"], "fx": fx,
+            "currency": crow["reporting_currency"]}
+
+
 def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
     """Forecast anchors computed from extracted filings (metal-aware):
     payability range (reported revenue vs production x realized price, USD),
@@ -165,7 +197,7 @@ def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
         f"""SELECT m.period, m.value AS oz, {sub(f'{metal}_sold_oz')} AS sold_oz,
               {sub('reported_cost')} AS cost, {sub('capex')} AS capex,
               {sub('revenue')} AS revenue, {sub(price_m)} AS price,
-              {sub('interest_expense')} AS interest,
+              {sub('interest_expense')} AS interest, {sub('depreciation')} AS depreciation,
               {sub('aisc_reported')} AS aisc_rep,
               (SELECT currency FROM quarterly_metrics WHERE company_id=m.company_id
                  AND period=m.period AND metric='aisc_reported') AS aisc_ccy,
@@ -211,6 +243,9 @@ def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
         aisc_source = "derived"
     int_rows = [r for r in rows if r["interest"] is not None][-trailing:]
     interest = sum(r["interest"] * r["fx"] for r in int_rows) if int_rows else None
+    dep_rows = [r for r in rows if r["depreciation"] is not None][-trailing:]
+    depreciation = (sum(r["depreciation"] * r["fx"] for r in dep_rows)
+                    if dep_rows else None)
     return {
         "pay_min": min(pays) if pays else None,
         "pay_avg": sum(pays) / len(pays) if pays else None,
@@ -218,6 +253,7 @@ def filings_stats(conn, company_id: int, trailing: int = 4) -> dict | None:
         "aisc_usd": aisc,
         "aisc_source": aisc_source,
         "interest_usd": interest,
+        "depreciation_usd": depreciation,
         "metal": metal,
         "n_quarters": len(rows),
     }

@@ -72,6 +72,15 @@ CREATE TABLE IF NOT EXISTS fx_rates (
   PRIMARY KEY (pair, period)
 );
 
+CREATE TABLE IF NOT EXISTS market_data (
+  symbol TEXT PRIMARY KEY,          -- yfinance symbol, e.g. 'SOMA.V'
+  as_of TEXT NOT NULL,             -- ISO date of the last close used
+  price_local REAL,               -- last close in the listing currency
+  currency TEXT,                  -- listing currency (GBp normalised to GBP)
+  shares REAL,                    -- shares outstanding
+  market_cap_usd REAL             -- price_local (in USD) x shares
+);
+
 CREATE TABLE IF NOT EXISTS npv_scenarios (
   id INTEGER PRIMARY KEY,
   company_id INTEGER NOT NULL REFERENCES companies(id),
@@ -234,6 +243,24 @@ def set_fx(conn, pair: str, period: str, rate: float) -> None:
         """INSERT INTO fx_rates(pair, period, rate) VALUES(?,?,?)
            ON CONFLICT(pair, period) DO UPDATE SET rate=excluded.rate""",
         (pair, period, rate))
+
+
+def set_market(conn, symbol: str, as_of: str, price_local: float | None,
+               currency: str | None, shares: float | None,
+               market_cap_usd: float | None) -> None:
+    conn.execute(
+        """INSERT INTO market_data(symbol, as_of, price_local, currency, shares,
+             market_cap_usd) VALUES(?,?,?,?,?,?)
+           ON CONFLICT(symbol) DO UPDATE SET
+             as_of=excluded.as_of, price_local=excluded.price_local,
+             currency=excluded.currency, shares=excluded.shares,
+             market_cap_usd=excluded.market_cap_usd""",
+        (symbol, as_of, price_local, currency, shares, market_cap_usd))
+
+
+def get_market(conn, symbol: str) -> dict | None:
+    row = conn.execute("SELECT * FROM market_data WHERE symbol=?", (symbol,)).fetchone()
+    return dict(row) if row else None
 
 
 def save_scenario(conn, company_id: int, name: str, assumptions: dict) -> None:

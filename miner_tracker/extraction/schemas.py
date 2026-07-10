@@ -56,6 +56,8 @@ METRIC_DEFS: dict[str, bool] = {
     "aisc_reported": True,          # per-oz, only when the report states AISC itself
     "cash_cost_per_oz": True,
 }
+# 'cash', 'debt', 'shares_outstanding' also live as stored metric names (the
+# balance_sheet pass writes them via BALANCE_SHEET_SCHEMA, not this block).
 
 
 def _metrics_block() -> dict:
@@ -149,6 +151,22 @@ FIN_PERIOD_SCHEMA = {
     "additionalProperties": False,
 }
 
+# Balance-sheet pass (SEDAR financial-statements PDFs): just the three items
+# needed for net debt + market cap that the MD&A doesn't carry.
+BALANCE_SHEET_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "period_end_date": {"type": "string"},   # YYYY-MM-DD
+        "cash": _metric(),
+        "total_debt": _metric(),
+        "shares_outstanding": _metric(),
+        "notes": {"type": ["string", "null"]},
+    },
+    "required": ["period_end_date", "cash", "total_debt", "shares_outstanding",
+                 "notes"],
+    "additionalProperties": False,
+}
+
 # SEDAR annual MD&A: the Q4 quarter column AND the embedded mineral
 # reserves/resources statement (Canadian MD&As restate it each year).
 ANNUAL_MDA_SCHEMA = {
@@ -168,6 +186,7 @@ SCHEMAS = {
     "interim_report": INTERIM_SCHEMA,
     "quarterly_activities": INTERIM_SCHEMA,
     "annual_mda": ANNUAL_MDA_SCHEMA,       # Q4 quarter column + reserves statement
+    "balance_sheet": BALANCE_SHEET_SCHEMA,  # SEDAR FS: cash / total debt / shares
     "fs_release": FS_RELEASE_SCHEMA,
     "half_year_report": FIN_PERIOD_SCHEMA,
     "fy_report": FIN_PERIOD_SCHEMA,

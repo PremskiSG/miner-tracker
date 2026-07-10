@@ -22,9 +22,12 @@ _KIND_MAP = {
     "financial-statement-release": "fs_release",
     "quarterly-activities-report": "quarterly_activities",
     # SEDAR (Canada): MD&A carries the operating+financial table; the paired
-    # financial-statements PDFs are unmapped -> skipped (MD&A covers them).
+    # financial-statements PDFs carry the balance sheet (cash/debt/shares) the
+    # MD&A lacks -> extracted as a lightweight balance_sheet pass.
     "interim-md-a": "interim_report",
     "management-s-discussion-analysis-md-a": "annual_mda",
+    "interim-financial-statements": "balance_sheet",
+    "financial-statements": "balance_sheet",
     # LSE/AIM (UK): quarterly RNS operational updates + the half-year financial
     # report (HTML). The annual-financial-report is an ESEF/iXBRL .zip whose
     # reserves table has ambiguous dual-grade columns — left unmapped (skipped)
@@ -146,6 +149,15 @@ def fin_period_label(doc_type: str, period_end_date: str) -> str | None:
     if doc_type == "half_year_report":
         return f"{d.year}-H{1 if d.month <= 6 else 2}"
     return f"FY{d.year}-{d.month:02d}"
+
+
+def quarter_label_for_date(period_end_date: str) -> str | None:
+    """Calendar quarter a balance-sheet date falls in: 2026-03-31 -> '2026-Q1'."""
+    try:
+        d = datetime.strptime(period_end_date[:10], "%Y-%m-%d")
+    except ValueError:
+        return None
+    return f"{d.year}-Q{(d.month - 1) // 3 + 1}"
 
 
 def _days_in_quarter(period: str) -> int:
@@ -321,6 +333,30 @@ def _store(conn, doc, company_cfg: dict, data: dict) -> None:
                        doc["id"], doc_review)
         conn.execute("UPDATE documents SET period=? WHERE id=?",
                      (f"{year}-Q4", doc["id"]))
+
+    elif doc["doc_type"] == "balance_sheet":
+        period = quarter_label_for_date(data.get("period_end_date", ""))
+        if period is None:
+            logger.warning("%s: bad period_end_date %r -> using publication quarter",
+                           Path(doc["path"]).name, data.get("period_end_date"))
+            doc_review = True
+            period = expected_period(doc["published_date"], "interim_report")
+        # cash / total debt / shares -> the same quarter as the MD&A metrics, so
+        # net debt = debt - cash resolves within one period
+        for field, metric, monetary in [("cash", "cash", True),
+                                        ("total_debt", "debt", True),
+                                        ("shares_outstanding", "shares_outstanding", False)]:
+            obj = data.get(field) or {}
+            value = obj.get("value")
+            if value is None:
+                continue
+            value = abs(float(value)) if monetary else float(value)
+            ccy = (obj.get("currency") or currency) if monetary else None
+            conf = obj.get("confidence") or "low"
+            db.upsert_metric(conn, cid, period, metric, value, ccy, obj.get("unit"),
+                             doc["id"], obj.get("page"), conf, is_derived=0,
+                             needs_review=1 if (doc_review or conf == "low") else 0)
+        conn.execute("UPDATE documents SET period=? WHERE id=?", (period, doc["id"]))
 
     elif doc["doc_type"] == "annual_report":
         _store_reserves(conn, cid, doc, data)

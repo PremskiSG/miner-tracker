@@ -53,6 +53,14 @@ def _norm_metrics_block(block) -> dict:
 
 def normalize(data: dict, doc_type: str) -> dict:
     """Coerce a loosely-followed response into the strict schema shape."""
+    if doc_type == "balance_sheet":
+        return {
+            "period_end_date": str(data.get("period_end_date") or ""),
+            "cash": _norm_metric(data.get("cash")),
+            "total_debt": _norm_metric(data.get("total_debt")),
+            "shares_outstanding": _norm_metric(data.get("shares_outstanding")),
+            "notes": data.get("notes"),
+        }
     if doc_type in ("half_year_report", "fy_report"):
         return {
             "period_end_date": str(data.get("period_end_date") or ""),

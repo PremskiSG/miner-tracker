@@ -24,14 +24,16 @@ def main(argv: list[str] | None = None) -> int:
     ex.add_argument("--limit", type=int, help="max documents this run")
     ex.add_argument("--type", dest="doc_type",
                     choices=["interim_report", "quarterly_activities", "annual_mda",
-                             "fs_release", "half_year_report", "fy_report",
-                             "annual_report"],
+                             "balance_sheet", "fs_release", "half_year_report",
+                             "fy_report", "annual_report"],
                     help="only documents of this type")
     ex.add_argument("--provider", choices=["anthropic", "deepseek"],
                     help="override config provider (with its default model)")
 
     fx = sub.add_parser("fx", help="refresh quarterly FX rates from yfinance")
     fx.add_argument("--start-year", type=int, default=2021)
+
+    sub.add_parser("market", help="refresh live market data (price, shares, mcap)")
 
     args = p.parse_args(argv)
     conn = db.connect()
@@ -55,6 +57,10 @@ def main(argv: list[str] | None = None) -> int:
         from miner_tracker.fx import refresh_all
         refresh_all(conn, start_year=args.start_year)
         print("fx: rates refreshed")
+    elif args.cmd == "market":
+        from miner_tracker.market import refresh_all
+        refresh_all(conn)
+        print("market: data refreshed")
     return 0
 
 
