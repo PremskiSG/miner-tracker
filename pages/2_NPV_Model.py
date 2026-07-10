@@ -9,7 +9,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from miner_tracker import db, queries, ui
-from miner_tracker.npv import GlobalInputs, YearInputs, assumptions_from_inputs, compute
+from miner_tracker.npv import (GlobalInputs, YearInputs, assumptions_from_inputs,
+                               carry_forward_aisc, compute, mine_life)
 from miner_tracker.seeds import blank_scenario, seed_company_scenarios
 
 st.set_page_config(page_title="NPV Model", layout="wide")
@@ -144,6 +145,8 @@ grid.columns = [str(y) for y in grid.columns]
 edited = st.data_editor(grid, use_container_width=True,
                         column_config={col: st.column_config.NumberColumn(width="small")
                                        for col in grid.columns})
+st.caption("Edit production and (optionally) AISC per year above — this grid IS the "
+           "production forecast. A blank AISC year inherits the previous year's.")
 
 g = GlobalInputs(**{k: v for k, v in g_dict.items()
                     if k in GlobalInputs.__dataclass_fields__})
@@ -152,6 +155,7 @@ for col in edited.columns:
     vals = {f: (float(edited.loc[f, col]) if pd.notna(edited.loc[f, col]) else 0.0)
             for f in ROW_FIELDS}
     years.append(YearInputs(year=int(col), price=float(price), **vals))
+carry_forward_aisc(years)   # blank AISC year -> prior year's AISC
 result = compute(g, years)
 
 m = st.columns(5)
@@ -160,6 +164,53 @@ m[1].metric("EV", f"${result.ev/1e6:,.1f}M")
 m[2].metric("EV / NPV", f"{result.ev_npv:.2f}" if result.npv else "—")
 m[3].metric("Upside vs MCap", f"{result.upside:+.1%}" if g.market_cap else "—")
 m[4].metric("P/E (first year)", f"{result.years[0].pe:.1f}" if result.years else "—")
+
+# ── Mine life: reserves outstanding vs the production forecast above ──────────
+st.subheader("Mine life")
+mo = queries.mineable_ounces(conn, company["id"])  # reserve_oz + resource split
+if mo is None:
+    st.info(f"No reserves/resources on file for {company['name']} — add them on the "
+            "Reserves page (from an annual report) to estimate mine life.")
+else:
+    factor = st.slider("Resource conversion factor (share of Measured+Indicated "
+                       "resources counted as mineable)", 0.0, 1.0, 0.60, 0.05,
+                       help="Reserves (Proved+Probable) always count 100%. Inferred "
+                            "resources are excluded.")
+    reserve_oz = mo["reserve_oz"]
+    resource_oz = mo["resource_mi_oz"]
+    mineable = reserve_oz + factor * resource_oz
+    stmt_year = int(mo["statement_date"][:4])
+    ml = mine_life(mineable, years, from_year=stmt_year)
+    forecast_oz = sum(y.production_oz or 0 for y in years if y.year >= stmt_year)
+
+    if forecast_oz <= 0:
+        life_str, depl_str = "— yrs", "enter a production forecast above"
+    elif ml.depletion_year:
+        life_str = f"{ml.years:.1f} yrs"
+        depl_str = f"depleted ~{ml.depletion_year}"
+    else:
+        life_str = f"≥ {ml.years:.0f} yrs"
+        depl_str = f"{ml.remaining_oz/1e3:,.0f} koz left after {years[-1].year}"
+    mm = st.columns(4)
+    mm[0].metric(f"Mine life ({mo['metal']})", life_str, depl_str, delta_color="off")
+    mm[1].metric("Mineable oz", f"{mineable/1e3:,.0f} koz")
+    mm[2].metric("Reserves (P&P)", f"{reserve_oz/1e3:,.0f} koz")
+    mm[3].metric(f"{factor:.0%} of M&I resource",
+                 f"{factor*resource_oz/1e3:,.0f} koz",
+                 f"of {resource_oz/1e3:,.0f} koz M&I", delta_color="off")
+    caption = (f"Basis: {mo['basis']} as at {mo['statement_date']} · reserves + "
+               f"{factor:.0%} of M&I resources, walked against the production "
+               f"forecast from {stmt_year}. ")
+    if forecast_oz <= 0:
+        caption += "Set production per year in the grid above to compute mine life."
+    elif ml.depletion_year:
+        caption += f"At the planned rate, reserves support production to ~{ml.depletion_year}."
+    else:
+        caption += "Reserves outlast the forecast horizon."
+    if reserve_oz and resource_oz:
+        caption += (" Note: if the company reports M&I *inclusive* of reserves, this "
+                    "additive basis overstates — lower the factor to compensate.")
+    st.caption(caption)
 
 fig = go.Figure()
 fig.add_bar(x=[y.year for y in result.years],

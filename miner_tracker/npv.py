@@ -90,6 +90,49 @@ def compute(g: GlobalInputs, years: list[YearInputs]) -> ModelResult:
     return out
 
 
+@dataclass
+class MineLife:
+    years: float                    # total years of production the reserves support
+    depletion_year: int | None      # calendar year reserves run out (None = not within horizon)
+    remaining_oz: float             # ounces still in the ground after the forecast horizon
+    consumed_oz: float              # ounces the forecast produces (capped at mineable)
+
+
+def carry_forward_aisc(years: list[YearInputs]) -> None:
+    """In place: a year with no AISC (None/0) inherits the previous year's."""
+    last = 0.0
+    for y in years:
+        if y.aisc:
+            last = y.aisc
+        elif last:
+            y.aisc = last
+
+
+def mine_life(mineable_oz: float, years: list[YearInputs],
+              from_year: int | None = None) -> MineLife:
+    """Walk the production forecast, depleting `mineable_oz` year by year.
+    Returns full years supported (fractional in the final year) and the
+    calendar year of depletion. Payability/recovery are ignored — mine life is
+    contained ounces vs planned production."""
+    remaining = mineable_oz
+    consumed = 0.0
+    life = 0.0
+    for y in sorted(years, key=lambda y: y.year):
+        if from_year is not None and y.year < from_year:
+            continue
+        prod = y.production_oz or 0.0
+        if prod <= 0:
+            continue
+        if remaining <= prod:
+            life += remaining / prod
+            consumed += remaining
+            return MineLife(round(life, 2), y.year, 0.0, consumed)
+        remaining -= prod
+        consumed += prod
+        life += 1
+    return MineLife(round(life, 2), None, remaining, consumed)
+
+
 def years_from_assumptions(assumptions: dict) -> tuple[GlobalInputs, list[YearInputs]]:
     """Rebuild engine inputs from a scenario's persisted JSON:
     {"globals": {...}, "years": [{...}, ...]}"""

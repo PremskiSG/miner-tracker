@@ -66,3 +66,41 @@ def test_assumptions_roundtrip():
     g, years = spot_inputs()
     g2, years2 = years_from_assumptions(assumptions_from_inputs(g, years))
     assert compute(g2, years2).npv == pytest.approx(compute(g, years).npv, rel=1e-12)
+
+
+def test_carry_forward_aisc():
+    from miner_tracker.npv import YearInputs, carry_forward_aisc
+    ys = [YearInputs(2024, aisc=35), YearInputs(2025, aisc=0),
+          YearInputs(2026, aisc=0), YearInputs(2027, aisc=50)]
+    carry_forward_aisc(ys)
+    assert [y.aisc for y in ys] == [35, 35, 35, 50]  # blanks inherit prior
+
+
+def test_mine_life_depletes_within_horizon():
+    from miner_tracker.npv import YearInputs, mine_life
+    years = [YearInputs(2025, production_oz=100_000),
+             YearInputs(2026, production_oz=100_000),
+             YearInputs(2027, production_oz=100_000)]
+    ml = mine_life(250_000, years)          # 2.5 years of 100k/yr
+    assert ml.years == 2.5
+    assert ml.depletion_year == 2027
+    assert ml.remaining_oz == 0
+
+
+def test_mine_life_outlasts_forecast():
+    from miner_tracker.npv import YearInputs, mine_life
+    years = [YearInputs(2025, production_oz=50_000),
+             YearInputs(2026, production_oz=50_000)]
+    ml = mine_life(500_000, years)          # only 100k produced, 400k remains
+    assert ml.depletion_year is None
+    assert ml.remaining_oz == 400_000
+    assert ml.years == 2.0
+
+
+def test_mine_life_respects_from_year():
+    from miner_tracker.npv import YearInputs, mine_life
+    years = [YearInputs(2024, production_oz=1_000_000),  # ignored (before from_year)
+             YearInputs(2025, production_oz=100_000),
+             YearInputs(2026, production_oz=100_000)]
+    ml = mine_life(150_000, years, from_year=2025)
+    assert ml.depletion_year == 2026 and ml.years == 1.5

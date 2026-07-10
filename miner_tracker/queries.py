@@ -80,6 +80,58 @@ def reserves_aggregate(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(out).sort_values(["statement_date", "category"])
 
 
+OZ_PER_TONNE_GPT = 1_000_000 / 31.1035  # tonnes(Mt-free) * g/t -> troy oz factor
+_RESERVE_CATS = ("proved", "probable", "pp")
+_RESOURCE_MI = ("measured", "indicated", "measured_indicated")
+
+
+def _contained_oz(agg: pd.DataFrame, cats) -> float:
+    """Contained ounces = sum(tonnage_t * grade_gpt / 31.1035) over categories.
+    Uses the split form (proved+probable / measured+indicated) when present,
+    else the combined form (pp / measured_indicated) — never both, so a
+    company that reports a combined subtotal isn't double-counted."""
+    present = set(agg["category"])
+    if cats is _RESERVE_CATS:
+        use = ["proved", "probable"] if {"proved", "probable"} & present else ["pp"]
+    elif cats is _RESOURCE_MI:
+        use = (["measured", "indicated"] if {"measured", "indicated"} & present
+               else ["measured_indicated"])
+    else:
+        use = list(cats)
+    sub = agg[agg["category"].isin(use)].dropna(subset=["tonnage", "grade_gpt"])
+    return float((sub["tonnage"] * sub["grade_gpt"]).sum() / 31.1035)
+
+
+def mineable_ounces(conn, company_id: int, resource_factor: float = 0.60) -> dict | None:
+    """Mineable contained ounces at the latest statement date:
+        reserves (P&P, 100%) + resource_factor x M&I resources.
+    Inferred is excluded. Returns basis breakdown or None if no reserves data."""
+    df = reserves_frame(conn, company_id)
+    if df.empty:
+        return None
+    metal = conn.execute("SELECT metal FROM companies WHERE id=?",
+                         (company_id,)).fetchone()["metal"]
+    df = df[df["metal"] == metal]
+    if df.empty:
+        return None
+    latest = df["statement_date"].max()
+    agg = reserves_aggregate(df[df["statement_date"] == latest])
+    reserve_oz = _contained_oz(agg, _RESERVE_CATS)
+    resource_oz = _contained_oz(agg, _RESOURCE_MI)
+    mineable = reserve_oz + resource_factor * resource_oz
+    return {
+        "mineable_oz": mineable,
+        "reserve_oz": reserve_oz,
+        "resource_mi_oz": resource_oz,
+        "resource_factor": resource_factor,
+        "statement_date": latest,
+        "metal": metal,
+        "basis": ("reserves + resource"
+                  if reserve_oz and resource_oz else
+                  "reserves only" if reserve_oz else "resource only"),
+    }
+
+
 def review_rows(conn, company_id: int) -> pd.DataFrame:
     return pd.read_sql_query(
         """SELECT m.id, m.period, m.metric, m.value, m.currency, m.unit,
