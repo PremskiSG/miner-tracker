@@ -111,6 +111,35 @@ def test_annual_mda_period_is_prior_q4():
     assert pipeline.expected_period("2025-11-28", "interim_report") == "2025-Q3"
 
 
+def test_lse_filename_and_kind_mapping():
+    cases = {
+        "2025-05-12_1st-quarter-results_8871715.html": "interim_report",
+        "2025-01-27_q4-production-results_8706391.html": "interim_report",
+        "2025-10-27_3rd-quarter-results_9194910.html": "interim_report",
+        "2025-09-25_half-year-financial-report_0924972747.html": "half_year_report",
+        # ESEF .zip annual + hyphen-leading suffix -> unmapped (skipped)
+        "2026-04-29_annual-financial-report_-000144283.zip": None,
+        "2026-01-22_miscellaneous_38b83c104d.html": None,
+    }
+    for fname, expected in cases.items():
+        m = pipeline._FILENAME_RE.match(fname)
+        assert m, fname
+        assert pipeline.doc_type_for_kind(m.group(2)) == expected, fname
+
+
+def test_html_to_text_strips_tags_and_tables():
+    from miner_tracker.extraction.pdftext import html_to_text
+    raw = ("<html><head><style>x{}</style></head><body>"
+           "<p>Gold sold 11,532 oz</p>"
+           "<table><tr><td>Revenue</td><td>US$56.3m</td></tr></table>"
+           "revenue &amp; profit</body></html>")
+    txt = html_to_text(raw)
+    assert "Gold sold 11,532 oz" in txt
+    assert "Revenue | US$56.3m" in txt
+    assert "revenue & profit" in txt
+    assert "<" not in txt and "style" not in txt
+
+
 def test_fin_period_label():
     assert pipeline.fin_period_label("half_year_report", "2025-12-31") == "2025-H2"
     assert pipeline.fin_period_label("half_year_report", "2024-06-30") == "2024-H1"

@@ -13,7 +13,7 @@ import anthropic
 
 from miner_tracker.extraction.extractor import ExtractionResult
 from miner_tracker.extraction.parsing import normalize, parse_json
-from miner_tracker.extraction.pdftext import pdf_to_text
+from miner_tracker.extraction.pdftext import doc_to_text
 from miner_tracker.extraction.prompts import PROMPTS, SYSTEM
 from miner_tracker.extraction.schemas import SCHEMAS
 from miner_tracker.secrets import get_secret
@@ -43,9 +43,9 @@ def _client() -> anthropic.Anthropic:
 def extract_pdf(pdf_path: Path, doc_type: str, company_name: str,
                 published_date: str, model: str, max_tokens: int = 8192,
                 metal: str = "silver") -> ExtractionResult:
-    text = pdf_to_text(pdf_path, doc_type)
+    text = doc_to_text(pdf_path, doc_type)
     if not text.strip():
-        raise ValueError("PDF produced no extractable text")
+        raise ValueError("document produced no extractable text")
     schema = SCHEMAS[doc_type]
     prompt = (
         PROMPTS[doc_type](company_name, published_date, metal)

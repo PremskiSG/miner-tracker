@@ -25,7 +25,17 @@ _KIND_MAP = {
     # financial-statements PDFs are unmapped -> skipped (MD&A covers them).
     "interim-md-a": "interim_report",
     "management-s-discussion-analysis-md-a": "annual_mda",
+    # LSE/AIM (UK): quarterly RNS operational updates + the half-year financial
+    # report (HTML). The annual-financial-report is an ESEF/iXBRL .zip whose
+    # reserves table has ambiguous dual-grade columns — left unmapped (skipped)
+    # until a dedicated ESEF parser exists; operational quarters cover Q1-Q4.
+    "half-year-financial-report": "half_year_report",
 }
+
+# LSE quarterly RNS: "1st-quarter-results", "q4-production-results", etc.
+_KIND_RE_RULES = [
+    (re.compile(r"(?:quarter|production)-results$"), "interim_report"),
+]
 
 # (prefix, doc_type) rules for kinds that embed years/suffixes, e.g.
 # "appendix-4d-and-2025-half-year-financial-report"
@@ -35,9 +45,11 @@ _KIND_PREFIXES = [
     ("annual-report", "annual_report"),
 ]
 
-# date_kind_suffix. kind is greedy up to the LAST underscore so multi-word kinds
-# work; suffix is the source hash (may contain hyphens, e.g. 'da-en-2eed').
-_FILENAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})_(.+)_([a-z0-9\-]+)\.pdf$")
+# date_kind_suffix.ext. kind is greedy up to the LAST underscore so multi-word
+# kinds work; suffix is the source hash (may contain hyphens, e.g. 'da-en-2eed'
+# or '-000144283'); ext covers PDF, LSE RNS HTML, and ESEF .zip packages.
+_FILENAME_RE = re.compile(
+    r"^(\d{4}-\d{2}-\d{2})_(.+)_([a-z0-9\-]+)\.(?:pdf|html?|xhtml|zip)$")
 
 
 def doc_type_for_kind(kind: str) -> str | None:
@@ -45,6 +57,9 @@ def doc_type_for_kind(kind: str) -> str | None:
         return _KIND_MAP[kind]
     for prefix, doc_type in _KIND_PREFIXES:
         if kind.startswith(prefix):
+            return doc_type
+    for rx, doc_type in _KIND_RE_RULES:
+        if rx.search(kind):
             return doc_type
     return None
 
@@ -61,8 +76,11 @@ _CATEGORY_MAP = {
 _METAL_MAP = {"ag": "silver", "au": "gold", "pb": "lead", "zn": "zinc"}
 
 
+_FILING_EXTS = (".pdf", ".html", ".htm", ".xhtml", ".zip")
+
+
 def sync(conn) -> int:
-    """Register all PDFs on disk into the documents table. Returns #new."""
+    """Register filing documents on disk (PDF/HTML/ESEF-zip). Returns #new."""
     new = 0
     for c in companies():
         cid = db.upsert_company(conn, c["market"], c["ticker"], c["name"],
@@ -72,7 +90,9 @@ def sync(conn) -> int:
         if not folder.is_dir():
             logger.warning("no filings folder: %s", folder)
             continue
-        for pdf in sorted(folder.glob("*.pdf")):
+        files = sorted(f for f in folder.iterdir()
+                       if f.suffix.lower() in _FILING_EXTS)
+        for pdf in files:
             m = _FILENAME_RE.match(pdf.name)
             if not m:
                 logger.warning("unrecognized filename, skipping: %s", pdf.name)

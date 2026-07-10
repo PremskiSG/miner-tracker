@@ -37,3 +37,9 @@ companies:
     reporting_currency: USD      # Segilola (Nigeria) reports in USD -> no FX pair
     fx_pair:
     metal: gold
+  - market: UK
+    ticker: ALTN
+    name: AltynGold
+    reporting_currency: USD      # LSE/AIM; Sekisovskoye (Kazakhstan) reports in USD
+    fx_pair:
+    metal: gold
